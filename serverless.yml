@@ -5,13 +5,46 @@ provider:
   region: eu-west-2
   runtime: dotnetcore2.1
 
+  environment:
+    PHOTOGRAPH_TABLE: ${self:service}-${opt:stage, self:provider.stage}-photograph
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.PHOTOGRAPH_TABLE}"
+
 package:
   artifact: deploy/deploy-package.zip
 
 functions:
-  hello:
-    handler: Toxon.Photography::Toxon.Photography.HelloFunction::Handle
+  create-photograph:
+    handler: Toxon.Photography::Toxon.Photography.CreatePhotographFunction::Handle
     events:
       - http:
-          path: hello
-          method: get
+          path: photograph
+          method: put
+          cors: true
+
+resources:
+  Resources:
+    PhotographTable:
+      Type: "AWS::DynamoDB::Table"
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.PHOTOGRAPH_TABLE}
