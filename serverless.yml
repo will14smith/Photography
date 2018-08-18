@@ -1,0 +1,17 @@
+service: Photography
+
+provider:
+  name: aws
+  region: eu-west-2
+  runtime: dotnetcore2.1
+
+package:
+  artifact: deploy/deploy-package.zip
+
+functions:
+  hello:
+    handler: Toxon.Photography::Toxon.Photography.HelloFunction::Handle
+    events:
+      - http:
+          path: hello
+          method: get
