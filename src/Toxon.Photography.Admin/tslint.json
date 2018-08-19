@@ -1,7 +1,8 @@
 {
   "extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
   "rules": {
-    "interface-name": [true, "never-prefix"]
+    "interface-name": [true, "never-prefix"],
+    "jsx-boolean-value": [true, "never"]
   },
   "linterOptions": {
     "exclude": [

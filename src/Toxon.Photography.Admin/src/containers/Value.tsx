@@ -4,9 +4,9 @@ import { Dispatch } from "redux";
 import Value from "../components/Value";
 
 import * as actions from "../redux/actions";
-import { ValueState } from "../redux/store";
+import { RootState } from "../redux/store";
 
-export function mapStateToProps({ value }: ValueState) {
+export function mapStateToProps({ value }: RootState) {
   return {
     value
   };
