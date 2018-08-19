@@ -45,7 +45,7 @@ namespace Toxon.Photography
             var headers = request.GetHeaders();
             if (!headers.ContentType.IsSubsetOf(MediaTypeHeaderValue.Parse("application/json")))
             {
-                response = ErrorResponse.Create(HttpStatusCode.BadRequest, "Content-Type should be application/json");
+                response = Response.CreateError(HttpStatusCode.BadRequest, "Content-Type should be application/json");
                 return false;
             }
 
@@ -73,21 +73,10 @@ namespace Toxon.Photography
 
         internal static APIGatewayProxyResponse BuildResponseFromModel(Photograph photograph)
         {
-            var body = JsonConvert.SerializeObject(new
+            return Response.CreateJson(HttpStatusCode.Created, new
             {
                 photograph.Id,
             });
-
-            return new APIGatewayProxyResponse
-            {
-                StatusCode = (int)HttpStatusCode.OK,
-                Headers = new Dictionary<string, string>
-                {
-                    ["Content-Type"] = "application/json",
-                },
-
-                Body = body,
-            };
         }
     }
 }
