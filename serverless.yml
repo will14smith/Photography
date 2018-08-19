@@ -31,6 +31,13 @@ functions:
           path: photograph
           method: put
           cors: true
+  list-photographs:
+    handler: Toxon.Photography::Toxon.Photography.ListPhotographsFunction::Handle
+    events:
+      - http:
+          path: photograph
+          method: get
+          cors: true
 
 resources:
   Resources:
