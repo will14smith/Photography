@@ -1,9 +1,7 @@
 import * as React from "react";
 import { Route, Switch } from "react-router";
 
-function Home() {
-  return <div>Hello World!</div>;
-}
+import Home from "./components/Home";
 import Value from "./containers/Value";
 
 const routes = (
