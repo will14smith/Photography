@@ -6,7 +6,9 @@ export interface Photograph {
 }
 
 export async function getAll(): Promise<Photograph[]> {
-  const response = await fetch(ENDPOINT + "/photograph", { method: "GET" });
+  const response = await fetch(ENDPOINT + "/photograph", {
+    method: "GET"
+  });
 
   if (!response.ok) {
     throw new Error("Failed to get all photographs: " + response);

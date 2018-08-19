@@ -1,3 +1,5 @@
+import { PhotographAction } from "./photograph";
+
 export const INCREMENT_VALUE = "INCREMENT_VALUE";
 export type INCREMENT_VALUE = typeof INCREMENT_VALUE;
 
@@ -25,3 +27,5 @@ export function decrementValue(): DecrementValue {
     type: DECREMENT_VALUE
   };
 }
+
+export type RootAction = ValueAction | PhotographAction;

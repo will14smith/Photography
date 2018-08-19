@@ -3,6 +3,8 @@ import { combineReducers } from "redux";
 import { DECREMENT_VALUE, INCREMENT_VALUE, ValueAction } from "./actions";
 import { ValueState } from "./store";
 
+import { reducer as photographReducer } from "./photograph";
+
 const defaultValueState: ValueState = 1;
 
 export function valueReducer(
@@ -19,6 +21,7 @@ export function valueReducer(
 }
 
 const rootReducer = combineReducers({
+  photographs: photographReducer,
   value: valueReducer
 });
 
