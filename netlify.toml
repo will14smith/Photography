@@ -1,0 +1,13 @@
+[settings]
+ID = "toxon-photography-admin"
+
+[build]
+
+base = "src/Toxon.Photography.Admin"
+publish = "src/Toxon.Photography.Admin/build"
+command = "yarn build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
