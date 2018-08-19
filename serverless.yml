@@ -1,4 +1,4 @@
-service: Photography
+service: photography
 
 provider:
   name: aws
