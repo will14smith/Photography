@@ -19,6 +19,17 @@ dotnet restore
 sls deploy
 ```
 
+## Running admin client
+
+Local:
+
+```
+cd src/Toxon.Photography.Admin
+REACT_APP_ENDPOINT={API Gateway endpoint} yarn start
+```
+
+Production: Just push to master, it is deployed automatically by Netlify
+
 ## Architecture
 
 ![Architecture diagram](docs/arch.png)
