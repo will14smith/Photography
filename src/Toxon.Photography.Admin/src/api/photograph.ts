@@ -1,3 +1,5 @@
+import { Auth } from "aws-amplify";
+
 import { ENDPOINT } from "./config";
 
 export interface Photograph {
@@ -10,7 +12,11 @@ export interface PhotographCreate {
 }
 
 export async function getAll(): Promise<Photograph[]> {
+  const session = await Auth.currentSession();
+  const token = session.idToken.jwtToken;
+
   const response = await fetch(ENDPOINT + "/photograph", {
+    headers: { Authorization: "Bearer " + token },
     method: "GET"
   });
 

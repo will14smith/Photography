@@ -47,6 +47,7 @@ export class PhotographList extends React.Component<Props> {
             </li>
           )}
           {!this.props.loading &&
+            !this.props.error &&
             (this.props.photographs.length !== 0 ? (
               this.props.photographs.map(photograph => (
                 <li key={photograph.Id}>

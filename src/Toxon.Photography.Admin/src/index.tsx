@@ -8,10 +8,16 @@ import { Provider } from "react-redux";
 import { applyMiddleware, compose, createStore } from "redux";
 import thunk from "redux-thunk";
 
+import Amplify from "aws-amplify";
+import { Authenticator, Greetings } from "aws-amplify-react";
+import amplifyConfig from "./amplifyConfig";
+
 import App from "./App";
 import "./index.css";
 import rootReducer from "./redux/reducer";
 import registerServiceWorker from "./registerServiceWorker";
+
+Amplify.configure(amplifyConfig);
 
 const history = createBrowserHistory();
 
@@ -26,7 +32,9 @@ const render = () => {
   ReactDOM.render(
     <AppContainer>
       <Provider store={store}>
-        <App history={history} />
+        <Authenticator hide={[Greetings]} federated={amplifyConfig.federated}>
+          <App history={history} />
+        </Authenticator>
       </Provider>
     </AppContainer>,
     document.getElementById("root")

@@ -23,9 +23,11 @@ sls deploy
 
 Local:
 
+Ensure `src/Toxon.Photography.Admin/.env` is present and up to date.
+
 ```
 cd src/Toxon.Photography.Admin
-REACT_APP_ENDPOINT={API Gateway endpoint} yarn start
+yarn start
 ```
 
 Production: Just push to master, it is deployed automatically by Netlify

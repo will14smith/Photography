@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { Auth } from "aws-amplify";
 import { ConnectedRouter } from "connected-react-router";
 import { History } from "history";
 
@@ -10,11 +11,19 @@ import routes from "./routes";
 import "./App.css";
 
 interface AppProps {
+  // these are injected by aws-amplify
+  authData?: any;
+  authState?: "signIn" | "signedIn";
+
   history: History;
 }
 
-const App = ({ history }: AppProps) => {
-  return (
+function logout() {
+  return Auth.signOut();
+}
+
+const App = ({ history, authData, authState }: AppProps) => {
+  return authState === "signedIn" ? (
     <ConnectedRouter history={history}>
       <div>
         <AppHeader />
@@ -22,7 +31,7 @@ const App = ({ history }: AppProps) => {
         <div className="container-fluid">
           <div className="row">
             <nav className="col-md-2 d-none d-md-block bg-light sidebar">
-              <AppSidebar />
+              <AppSidebar username={authData.username} onLogout={logout} />
             </nav>
 
             <main role="main" className="col-md-9 ml-sm-auto col-lg-10 px-4">
@@ -32,7 +41,7 @@ const App = ({ history }: AppProps) => {
         </div>
       </div>
     </ConnectedRouter>
-  );
+  ) : null;
 };
 
 export default App;
