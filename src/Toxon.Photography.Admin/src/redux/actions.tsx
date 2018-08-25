@@ -1,3 +1,5 @@
+import { RouterAction } from "connected-react-router";
+
 import { PhotographAction } from "./photograph";
 
 export const INCREMENT_VALUE = "INCREMENT_VALUE";
@@ -28,4 +30,4 @@ export function decrementValue(): DecrementValue {
   };
 }
 
-export type RootAction = ValueAction | PhotographAction;
+export type RootAction = ValueAction | PhotographAction | RouterAction;

@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as Icon from "react-feather";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 
 import { Photograph } from "../api/photograph";
 import ViewHeader from "../components/ViewHeader";
@@ -29,9 +30,12 @@ export class PhotographList extends React.Component<Props> {
     return (
       <div>
         <ViewHeader title="Photographs">
-          <button className="btn btn-sm btn-outline-secondary">
+          <Link
+            to="/photographs/create"
+            className="btn btn-sm btn-outline-secondary"
+          >
             <Icon.Plus />
-          </button>
+          </Link>
         </ViewHeader>
 
         <ul>
