@@ -38,12 +38,12 @@ namespace Toxon.Photography
             }
 
             var model = BuildModelFromRequest(request.Body);
-
-            var image = await SaveImageAsync(model);
-            var photograph = BuildPhotographyFromModel(model, image);
+            var photograph = BuildPhotographyFromModel(model);
 
             var photographTable = Table.LoadTable(_dynamoDb, TableNames.Photograph);
             await photographTable.PutItemAsync(BuildDocumentFromPhotograph(photograph));
+            
+            // TODO send SNS message to process image
 
             return BuildResponseFromModel(photograph);
         }
@@ -66,25 +66,12 @@ namespace Toxon.Photography
             return JsonConvert.DeserializeObject<PhotographyInputModel>(body);
         }
 
-        private async Task<Image> SaveImageAsync(PhotographyInputModel model)
-        {
-            var bucket = BucketNames.Images;
-            var key = Guid.NewGuid().ToString();
-
-            using (var stream = new MemoryStream(model.Image))
-            {
-                await _s3.UploadObjectFromStreamAsync(bucket, key, stream, new Dictionary<string, object> { { "ContentType", model.ImageContentType } });
-            }
-
-            return new Image { Type = ImageType.Full, ObjectKey = key };
-        }
-
-        internal static Photograph BuildPhotographyFromModel(PhotographyInputModel model, Image image)
+        internal static Photograph BuildPhotographyFromModel(PhotographyInputModel model)
         {
             return new Photograph
             {
                 Title = model.Title,
-                Images = new[] { image }
+                Images = new[] { new Image { Type = ImageType.Full, ObjectKey = model.ImageKey } }
             };
         }
 
