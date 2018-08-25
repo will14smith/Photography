@@ -1,4 +1,4 @@
-import fetch from "./fetch";
+import fetchWithAuthentication from "./fetch";
 
 export interface Photograph {
   Id: string;
@@ -10,7 +10,7 @@ export interface PhotographCreate {
 }
 
 export async function getAll(): Promise<Photograph[]> {
-  const response = await fetch("/photograph", {
+  const response = await fetchWithAuthentication("/photograph", {
     method: "GET"
   });
 
@@ -22,7 +22,7 @@ export async function getAll(): Promise<Photograph[]> {
 }
 
 export async function create(model: PhotographCreate): Promise<Photograph> {
-  const response = await fetch("/photograph", {
+  const response = await fetchWithAuthentication("/photograph", {
     body: JSON.stringify(model),
     headers: { "Content-Type": "application/json" },
     method: "POST"

@@ -2,7 +2,7 @@ import { Auth } from "aws-amplify";
 
 import { ENDPOINT } from "./config";
 
-export default async function fetch(
+export default async function fetchWithAuthentication(
   url: string,
   init: RequestInit = {}
 ): Promise<Response> {
