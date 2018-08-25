@@ -32,6 +32,10 @@ functions:
           path: photograph
           method: post
           cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
   list-photographs:
     handler: Toxon.Photography::Toxon.Photography.ListPhotographsFunction::Handle
     events:
@@ -39,6 +43,10 @@ functions:
           path: photograph
           method: get
           cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
 
 resources:
   Resources:
@@ -73,6 +81,20 @@ resources:
         UserPoolId:
           Ref: UserPool
         GenerateSecret: false
+
+    ApiGatewayAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        AuthorizerResultTtlInSeconds: 300
+        IdentitySource: method.request.header.Authorization
+        Name: Cognito
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        Type: COGNITO_USER_POOLS
+        ProviderARNs:
+          - Fn::GetAtt:
+              - UserPool
+              - Arn
 
   Outputs:
     UserPoolId:
