@@ -73,10 +73,7 @@ namespace Toxon.Photography
 
         internal static APIGatewayProxyResponse BuildResponseFromModel(Photograph photograph)
         {
-            return Response.CreateJson(HttpStatusCode.Created, new
-            {
-                photograph.Id,
-            });
+            return Response.CreateJson(HttpStatusCode.Created, photograph);
         }
     }
 }
