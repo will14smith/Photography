@@ -20,13 +20,15 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.PHOTOGRAPH_TABLE}"
+      Resource:
+        Fn::GetAtt: [PhotographTable, Arn]
     - Effect: Allow
       Action:
         - s3:GetObject
         - s3:PutObject
         - s3:DeleteObject
-      Resource: "arn:aws:s3:::${self:provider.environment.IMAGE_BUCKET}/*"
+      Resource:
+        Fn::GetAtt: [ImageBucket, Arn]
 
 package:
   artifact: deploy/deploy-package.zip
@@ -58,7 +60,7 @@ functions:
 resources:
   Resources:
     PhotographTable:
-      Type: "AWS::DynamoDB::Table"
+      Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
@@ -72,10 +74,54 @@ resources:
           WriteCapacityUnits: 1
         TableName: ${self:provider.environment.PHOTOGRAPH_TABLE}
 
-    ImagesBucket:
-      Type: "AWS::S3::Bucket"
+    ImageBucket:
+      Type: AWS::S3::Bucket
+      DeletionPolicy: Retain
       Properties:
         BucketName: ${self:provider.environment.IMAGE_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - PUT
+              AllowedOrigins:
+                - "*"
+
+    UserAccessRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}-${self:provider.stage}-UserAccessRole
+        Path: /
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Federated: "cognito-identity.amazonaws.com"
+              Action:
+                - "sts:AssumeRoleWithWebIdentity"
+              Condition:
+                StringEquals:
+                  "cognito-identity.amazonaws.com:aud":
+                    Ref: IdentityPool
+                "ForAnyValue:StringLike":
+                  "cognito-identity.amazonaws.com:amr": authenticated
+        Policies:
+          - PolicyName: ${self:service}-${self:provider.stage}-UserAccessPolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                  Resource:
+                    Fn::Join:
+                      - "/"
+                      - - Fn::GetAtt:
+                            - ImageBucket
+                            - Arn
+                        - "*"
 
     UserPool:
       Type: "AWS::Cognito::UserPool"
@@ -93,6 +139,24 @@ resources:
         UserPoolId:
           Ref: UserPool
         GenerateSecret: false
+    IdentityPool:
+      Type: AWS::Cognito::IdentityPool
+      Properties:
+        IdentityPoolName: "${self:service} ${self:provider.stage}"
+        AllowUnauthenticatedIdentities: false
+        CognitoIdentityProviders:
+          - ProviderName:
+              Fn::GetAtt: [UserPool, ProviderName]
+            ClientId:
+              Ref: UserPoolClient
+    IdentityPoolRoleAttachment:
+      Type: AWS::Cognito::IdentityPoolRoleAttachment
+      Properties:
+        IdentityPoolId:
+          Ref: IdentityPool
+        Roles:
+          authenticated:
+            Fn::GetAtt: [UserAccessRole, Arn]
 
     ApiGatewayAuthorizer:
       Type: AWS::ApiGateway::Authorizer
@@ -112,12 +176,24 @@ resources:
     UserPoolId:
       Description: The UserPoolId for the frontend
       Value:
-        "Ref": UserPool
+        Ref: UserPool
       Export:
         Name: ${self:service}:${self:provider.stage}:UserPoolId
     UserPoolWebClientId:
       Description: The UserPoolWebClientId for the frontend
       Value:
-        "Ref": UserPoolClient
+        Ref: UserPoolClient
       Export:
         Name: ${self:service}:${self:provider.stage}:UserPoolWebClientId
+    IdentityPoolId:
+      Description: The IdentityPoolId for the frontend
+      Value:
+        Ref: IdentityPool
+      Export:
+        Name: ${self:service}:${self:provider.stage}:IdentityPoolId
+    ImageBucket:
+      Description: The ImageBucket for the frontend
+      Value:
+        Ref: ImageBucket
+      Export:
+        Name: ${self:service}:${self:provider.stage}:ImageBucket

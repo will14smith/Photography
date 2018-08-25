@@ -1,4 +1,4 @@
-import { fetchWithAuthentication, fetchWithProgress } from "./fetch";
+import { fetchWithAuthentication } from "./fetch";
 
 export enum ImageType {
   Full = "Full",
@@ -18,8 +18,7 @@ export interface Photograph {
 export interface PhotographCreate {
   Title: string;
 
-  ImageBase64: string;
-  ImageContentType: string;
+  ImageKey: string;
 }
 
 export async function getAll(): Promise<Photograph[]> {
@@ -28,29 +27,26 @@ export async function getAll(): Promise<Photograph[]> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to get all photographs: " + response);
+    throw new Error(
+      "Failed to get all photographs: " + JSON.stringify(response)
+    );
   }
 
   return await response.json();
 }
 
-export async function create(
-  model: PhotographCreate,
-  onProgress?: ((evt: ProgressEvent) => any)
-): Promise<Photograph> {
-  const response = await fetchWithProgress(
-    "/photograph",
-    {
-      body: JSON.stringify(model),
-      headers: { "Content-Type": "application/json" },
-      method: "POST"
-    },
-    onProgress
-  );
+export async function create(model: PhotographCreate): Promise<Photograph> {
+  const response = await fetchWithAuthentication("/photograph", {
+    body: JSON.stringify(model),
+    headers: { "Content-Type": "application/json" },
+    method: "POST"
+  });
 
   if (!response.ok) {
-    throw new Error("Failed to get create photography: " + response);
+    throw new Error(
+      "Failed to get create photography: " + JSON.stringify(response)
+    );
   }
 
-  return JSON.parse(response.body);
+  return await response.json();
 }

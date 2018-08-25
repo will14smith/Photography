@@ -1,6 +1,7 @@
 import * as React from "react";
 import { connect } from "react-redux";
 
+import { Storage } from "aws-amplify";
 import { push } from "connected-react-router";
 
 import {
@@ -23,22 +24,16 @@ interface State {
   image: File | null;
 }
 
-function readBlobAsBase64(blob: Blob): Promise<string> {
-  const reader = new FileReader();
+function generateKey(length = 40) {
+  let text = "";
+  const possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-  return new Promise((resolve, reject) => {
-    reader.onload = () => {
-      const dataUri = reader.result as string;
+  for (let i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
 
-      const startOfContent = dataUri.indexOf("base64,") + "base64,".length;
-
-      resolve(dataUri.slice(startOfContent));
-    };
-    reader.onabort = reject;
-    reader.onerror = reject;
-
-    reader.readAsDataURL(blob);
-  });
+  return text;
 }
 
 export class PhotographCreate extends React.Component<Props, State> {
@@ -101,14 +96,14 @@ export class PhotographCreate extends React.Component<Props, State> {
       return;
     }
 
-    const imageBase64 = await readBlobAsBase64(state.image);
+    const key = generateKey();
+    await Storage.put(key, state.image, { contentType: state.image.type });
 
     this.props.createPhotograph(
       {
         Title: state.title,
 
-        ImageBase64: imageBase64,
-        ImageContentType: state.image.type
+        ImageKey: key
       },
       this.updateProgress
     );
@@ -121,11 +116,8 @@ export class PhotographCreate extends React.Component<Props, State> {
 
 export function mapDispatchToProps(dispatch: Dispatch) {
   return {
-    createPhotograph: async (
-      model: PhotographCreateModel,
-      onProgress?: ((evt: ProgressEvent) => any)
-    ) => {
-      const response = await create(model, onProgress);
+    createPhotograph: async (model: PhotographCreateModel) => {
+      const response = await create(model);
 
       // TODO redirect to photograph details
       dispatch(push("/photographs"));

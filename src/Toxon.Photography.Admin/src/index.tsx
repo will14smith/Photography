@@ -32,7 +32,7 @@ const render = () => {
   ReactDOM.render(
     <AppContainer>
       <Provider store={store}>
-        <Authenticator hide={[Greetings]} federated={amplifyConfig.federated}>
+        <Authenticator hide={[Greetings]}>
           <App history={history} />
         </Authenticator>
       </Provider>
