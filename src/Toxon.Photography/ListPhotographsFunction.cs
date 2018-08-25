@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -29,17 +30,28 @@ namespace Toxon.Photography
             var search = photographTable.Scan(new ScanFilter());
 
             var documents = await search.GetAllAsync();
-            var models = documents.Select(BuildModelFromDocument);
+            var models = documents.Select(BuildPhotographFromDocument);
 
             return BuildResponseFromModels(models);
         }
 
-        internal static Photograph BuildModelFromDocument(Document document)
+        internal static Photograph BuildPhotographFromDocument(Document document)
         {
             return new Photograph
             {
                 Id = document["id"].AsGuid(),
-                Title = document["title"].AsString()
+                Title = document["title"].AsString(),
+
+                Images = document["images"].AsListOfDocument().Select(BuildImageFromDocument).ToList(),
+            };
+        }
+
+        private static Image BuildImageFromDocument(Document document)
+        {
+            return new Image
+            {
+                Type = Enum.Parse<ImageType>(document["type"].AsString()),
+                ObjectKey = document["objectKey"].AsString(),
             };
         }
 

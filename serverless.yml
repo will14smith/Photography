@@ -8,6 +8,7 @@ provider:
 
   environment:
     PHOTOGRAPH_TABLE: ${self:service}-${self:provider.stage}-photograph
+    IMAGE_BUCKET: ${self:service}-${self:provider.stage}-image
 
   iamRoleStatements:
     - Effect: Allow
@@ -20,6 +21,12 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.PHOTOGRAPH_TABLE}"
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:PutObject
+        - s3:DeleteObject
+      Resource: "arn:aws:s3:::${self:provider.environment.IMAGE_BUCKET}/*"
 
 package:
   artifact: deploy/deploy-package.zip
@@ -64,6 +71,11 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: ${self:provider.environment.PHOTOGRAPH_TABLE}
+
+    ImagesBucket:
+      Type: "AWS::S3::Bucket"
+      Properties:
+        BucketName: ${self:provider.environment.IMAGE_BUCKET}
 
     UserPool:
       Type: "AWS::Cognito::UserPool"
