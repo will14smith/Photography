@@ -1,6 +1,4 @@
-import { Auth } from "aws-amplify";
-
-import { ENDPOINT } from "./config";
+import fetch from "./fetch";
 
 export interface Photograph {
   Id: string;
@@ -12,11 +10,7 @@ export interface PhotographCreate {
 }
 
 export async function getAll(): Promise<Photograph[]> {
-  const session = await Auth.currentSession();
-  const token = session.idToken.jwtToken;
-
-  const response = await fetch(ENDPOINT + "/photograph", {
-    headers: { Authorization: "Bearer " + token },
+  const response = await fetch("/photograph", {
     method: "GET"
   });
 
@@ -28,7 +22,7 @@ export async function getAll(): Promise<Photograph[]> {
 }
 
 export async function create(model: PhotographCreate): Promise<Photograph> {
-  const response = await fetch(ENDPOINT + "/photograph", {
+  const response = await fetch("/photograph", {
     body: JSON.stringify(model),
     headers: { "Content-Type": "application/json" },
     method: "POST"
