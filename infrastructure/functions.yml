@@ -20,3 +20,14 @@ list-photographs:
           type: COGNITO_USER_POOLS
           authorizerId:
             Ref: ApiGatewayAuthorizer
+
+# image processors
+thumbnail-processor:
+  handler: Toxon.Photography::Toxon.Photography.ThumbnailProcessorFunction::Handle
+  events:
+    - sns:
+        arn:
+          Ref: ImageProcessorTopic
+        # ideally this would be `Fn::GetAtt: [ImageProcessorTopic, TopicName]`
+        # but there seems to be bug where topicName must be a string if arn is ref
+        topicName: ${self:custom.imageProcessorTopicName}
