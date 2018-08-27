@@ -24,6 +24,7 @@ list-photographs:
 # image processors
 thumbnail-processor:
   handler: Toxon.Photography::Toxon.Photography.ThumbnailProcessorFunction::Handle
+  timeout: 300
   events:
     - sns:
         arn:
