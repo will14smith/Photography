@@ -96,8 +96,15 @@ export class PhotographCreate extends React.Component<Props, State> {
       return;
     }
 
-    const key = generateKey();
-    await Storage.put(key, state.image, { contentType: state.image.type });
+    const { key }: any = await Storage.put(
+      "image/" + generateKey(),
+      state.image,
+      {
+        contentType: state.image.type,
+        customPrefix: { public: "" },
+        level: "public"
+      }
+    );
 
     this.props.createPhotograph(
       {
