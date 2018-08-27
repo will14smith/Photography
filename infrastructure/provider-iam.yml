@@ -15,7 +15,10 @@
     - s3:PutObject
     - s3:DeleteObject
   Resource:
-    Fn::GetAtt: [ImageBucket, Arn]
+    Fn::Join:
+      - "/"
+      - - Fn::GetAtt: [ImageBucket, Arn]
+        - "*"
 - Effect: Allow
   Action:
     - sns:Publish
