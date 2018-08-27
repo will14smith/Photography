@@ -35,6 +35,18 @@ export async function getAll(): Promise<Photograph[]> {
   return await response.json();
 }
 
+export async function get(id: string): Promise<Photograph> {
+  const response = await fetchWithAuthentication(`/photograph/${id}`, {
+    method: "GET"
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to get photograph: " + JSON.stringify(response));
+  }
+
+  return await response.json();
+}
+
 export async function create(model: PhotographCreate): Promise<Photograph> {
   const response = await fetchWithAuthentication("/photograph", {
     body: JSON.stringify(model),

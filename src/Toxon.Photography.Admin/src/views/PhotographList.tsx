@@ -56,17 +56,19 @@ export class PhotographList extends React.Component<Props> {
             (this.props.photographs.length !== 0 ? (
               this.props.photographs.map(photograph => (
                 <li key={photograph.Id} className="list-group-item">
-                  <div className="row align-items-center">
-                    <div className="col-sm-auto">
-                      <S3Image
-                        imageKey={photograph.Images[1].ObjectKey}
-                        style={{ width: "50px" }}
-                      />
+                  <Link to={`/photographs/${photograph.Id}`}>
+                    <div className="row align-items-center">
+                      <div className="col-sm-auto">
+                        <S3Image
+                          imageKey={photograph.Images[1].ObjectKey}
+                          style={{ width: "50px" }}
+                        />
+                      </div>
+                      <div className="col-sm">
+                        <h3>{photograph.Title}</h3>
+                      </div>
                     </div>
-                    <div className="col-sm">
-                      <h3>{photograph.Title}</h3>
-                    </div>
-                  </div>
+                  </Link>
                 </li>
               ))
             ) : (
