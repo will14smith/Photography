@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Toxon.Photography
+namespace Toxon.Photography.Config
 {
     public static class BucketNames
     {

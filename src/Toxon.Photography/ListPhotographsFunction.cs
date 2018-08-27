@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.Lambda.APIGatewayEvents;
+using Toxon.Photography.Config;
 using Toxon.Photography.Http;
 using Toxon.Photography.Models;
 

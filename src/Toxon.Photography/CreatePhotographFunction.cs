@@ -10,6 +10,7 @@ using Amazon.Lambda.APIGatewayEvents;
 using Amazon.S3;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
+using Toxon.Photography.Config;
 using Toxon.Photography.Http;
 using Toxon.Photography.Models;
 
