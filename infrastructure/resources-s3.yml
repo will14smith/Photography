@@ -9,10 +9,14 @@ Resources:
           - AllowedHeaders:
               - "*"
             AllowedMethods:
+              - GET
               - PUT
+              - POST
+              - DELETE
             AllowedOrigins:
               - "*"
-
+            ExposedHeaders:
+              - ETag
 Outputs:
   ImageBucket:
     Description: The ImageBucket for the frontend
