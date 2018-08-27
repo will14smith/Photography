@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
 import { Photograph } from "../api/photograph";
+import S3Image from "../components/S3Image";
 import ViewHeader from "../components/ViewHeader";
 import * as redux from "../redux/photograph";
 import { RootState } from "../redux/store";
@@ -38,10 +39,14 @@ export class PhotographList extends React.Component<Props> {
           </Link>
         </ViewHeader>
 
-        <ul>
-          {this.props.loading && <li>Loading...</li>}
+        <ul className="list-group">
+          {this.props.loading && (
+            <li className="list-group-item list-group-item-light">
+              Loading...
+            </li>
+          )}
           {this.props.error && (
-            <li>
+            <li className="list-group-item list-group-item-danger">
               <strong>Error: </strong>
               {this.props.error.toString()}
             </li>
@@ -50,12 +55,24 @@ export class PhotographList extends React.Component<Props> {
             !this.props.error &&
             (this.props.photographs.length !== 0 ? (
               this.props.photographs.map(photograph => (
-                <li key={photograph.Id}>
-                  {photograph.Id} - {photograph.Title}
+                <li key={photograph.Id} className="list-group-item">
+                  <div className="row align-items-center">
+                    <div className="col-sm-auto">
+                      <S3Image
+                        imageKey={photograph.Images[1].ObjectKey}
+                        style={{ width: "50px" }}
+                      />
+                    </div>
+                    <div className="col-sm">
+                      <h3>{photograph.Title}</h3>
+                    </div>
+                  </div>
                 </li>
               ))
             ) : (
-              <li>No photographs, add one!</li>
+              <li className="list-group-item list-group-item-light">
+                No photographs, add one!
+              </li>
             ))}
         </ul>
       </div>

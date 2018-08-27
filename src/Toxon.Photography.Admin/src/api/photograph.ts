@@ -12,7 +12,7 @@ export interface Photograph {
   Id: string;
   Title: string;
 
-  Image: Image[];
+  Images: Image[];
 }
 
 export interface PhotographCreate {
