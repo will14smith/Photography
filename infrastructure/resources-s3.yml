@@ -1,0 +1,22 @@
+Resources:
+  ImageBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: ${self:provider.environment.IMAGE_BUCKET}
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - PUT
+            AllowedOrigins:
+              - "*"
+
+Outputs:
+  ImageBucket:
+    Description: The ImageBucket for the frontend
+    Value:
+      Ref: ImageBucket
+    Export:
+      Name: ${self:service}:${self:provider.stage}:ImageBucket

@@ -1,0 +1,22 @@
+create-photograph:
+  handler: Toxon.Photography::Toxon.Photography.CreatePhotographFunction::Handle
+  events:
+    - http:
+        path: photograph
+        method: post
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId:
+            Ref: ApiGatewayAuthorizer
+list-photographs:
+  handler: Toxon.Photography::Toxon.Photography.ListPhotographsFunction::Handle
+  events:
+    - http:
+        path: photograph
+        method: get
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId:
+            Ref: ApiGatewayAuthorizer
