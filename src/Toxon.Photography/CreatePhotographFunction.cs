@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.Lambda.APIGatewayEvents;
-using Amazon.S3;
+using Amazon.SimpleNotificationService;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Toxon.Photography.Config;
@@ -19,16 +19,16 @@ namespace Toxon.Photography
     public class CreatePhotographFunction
     {
         private readonly IAmazonDynamoDB _dynamoDb;
-        private readonly IAmazonS3 _s3;
+        private readonly IAmazonSimpleNotificationService _sns;
 
         public CreatePhotographFunction()
-            : this(new AmazonDynamoDBClient(), new AmazonS3Client())
+            : this(new AmazonDynamoDBClient(), new AmazonSimpleNotificationServiceClient())
         {
         }
-        public CreatePhotographFunction(IAmazonDynamoDB dynamoDb, IAmazonS3 s3)
+        public CreatePhotographFunction(IAmazonDynamoDB dynamoDb, IAmazonSimpleNotificationService sns)
         {
             _dynamoDb = dynamoDb;
-            _s3 = s3;
+            _sns = sns;
         }
 
         public async Task<APIGatewayProxyResponse> Handle(APIGatewayProxyRequest request)
@@ -43,8 +43,8 @@ namespace Toxon.Photography
 
             var photographTable = Table.LoadTable(_dynamoDb, TableNames.Photograph);
             await photographTable.PutItemAsync(BuildDocumentFromPhotograph(photograph));
-            
-            // TODO send SNS message to process image
+
+            await _sns.PublishAsync(TopicArns.ImageProcessor, JsonConvert.SerializeObject(new ImageProcessorMessage { PhotographId = photograph.Id, Image = photograph.Images.Single() }));
 
             return BuildResponseFromModel(photograph);
         }
