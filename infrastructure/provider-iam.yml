@@ -16,3 +16,8 @@
     - s3:DeleteObject
   Resource:
     Fn::GetAtt: [ImageBucket, Arn]
+- Effect: Allow
+  Action:
+    - sns:Publish
+  Resource:
+    Ref: ImageProcessorTopic

@@ -1,5 +1,8 @@
 service: photography
 
+custom:
+  imageProcessorTopicName: ${self:service}-${self:provider.stage}-imageprocessor
+
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
@@ -9,6 +12,8 @@ provider:
   environment:
     PHOTOGRAPH_TABLE: ${self:service}-${self:provider.stage}-photograph
     IMAGE_BUCKET: ${self:service}-${self:provider.stage}-image
+    IMAGE_PROCESSOR_TOPIC_ARN:
+      Ref: ImageProcessorTopic
 
   iamRoleStatements: ${file(infrastructure/provider-iam.yml)}
 
@@ -24,3 +29,4 @@ resources:
   - ${file(infrastructure/resources-dynamodb.yml)}
   - ${file(infrastructure/resources-iam.yml)}
   - ${file(infrastructure/resources-s3.yml)}
+  - ${file(infrastructure/resources-sns.yml)}
