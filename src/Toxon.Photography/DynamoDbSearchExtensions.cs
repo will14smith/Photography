@@ -4,7 +4,7 @@ using Amazon.DynamoDBv2.DocumentModel;
 
 namespace Toxon.Photography
 {
-    public static class DyanmoDbSearchExtensions
+    public static class DynamoDbSearchExtensions
     {
         public static async Task<IEnumerable<Document>> GetAllAsync(this Search search)
         {
