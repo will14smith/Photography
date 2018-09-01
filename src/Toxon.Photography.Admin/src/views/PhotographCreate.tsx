@@ -13,10 +13,7 @@ import ViewHeader from "../components/ViewHeader";
 import { Dispatch } from "../redux/types";
 
 export interface Props {
-  createPhotograph: (
-    model: PhotographCreateModel,
-    onProgress?: ((evt: ProgressEvent) => any)
-  ) => Promise<Photograph>;
+  createPhotograph: (model: PhotographCreateModel) => Promise<Photograph>;
 }
 
 interface State {
@@ -121,26 +118,20 @@ export class PhotographCreate extends React.Component<Props, State> {
       }
     );
 
-    this.props.createPhotograph(
-      {
-        Title: state.title,
+    this.props.createPhotograph({
+      Title: state.title,
 
-        ImageKey: key,
+      ImageKey: key,
 
-        CaptureTime: state.capture
-      },
-      this.updateProgress
-    );
-  };
-  private updateProgress = (evt: ProgressEvent) => {
-    // tslint:disable-next-line
-    console.log(evt);
+      CaptureTime: state.capture
+    });
   };
 }
 
 export function mapDispatchToProps(dispatch: Dispatch) {
   return {
     createPhotograph: async (model: PhotographCreateModel) => {
+      // TODO should this an action creator?
       const response = await create(model);
 
       dispatch(push(`/photographs/${response.Id}`));

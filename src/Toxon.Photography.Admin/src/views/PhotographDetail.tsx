@@ -1,5 +1,7 @@
 import * as React from "react";
+import * as Icon from "react-feather";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 
 import { Photograph } from "../api/photograph";
 import PhotographThumbnail from "../components/PhotographThumbnail";
@@ -32,9 +34,14 @@ export class PhotographDetail extends React.Component<Props> {
 
     return (
       <div>
-        <ViewHeader
-          title={photograph ? photograph.Title : "Photograph Detail"}
-        />
+        <ViewHeader title={photograph ? photograph.Title : "Photograph Detail"}>
+          <Link
+            to={`/photographs/${this.props.id}/edit`}
+            className="btn btn-sm btn-outline-secondary"
+          >
+            <Icon.Edit />
+          </Link>
+        </ViewHeader>
 
         <ul className="list-group">
           {loading && (

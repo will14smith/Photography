@@ -25,6 +25,11 @@ export interface PhotographCreate {
 
   CaptureTime: Date;
 }
+export interface PhotographEdit {
+  Title: string;
+
+  CaptureTime: Date;
+}
 
 function toAppModel(apiModel: any): Photograph {
   return {
@@ -76,5 +81,26 @@ export async function create(model: PhotographCreate): Promise<Photograph> {
     );
   }
 
-  return await response.json();
+  const apiModel = await response.json();
+  return toAppModel(apiModel);
+}
+
+export async function edit(
+  id: string,
+  model: PhotographEdit
+): Promise<Photograph> {
+  const response = await fetchWithAuthentication(`/photograph/${id}`, {
+    body: JSON.stringify(model),
+    headers: { "Content-Type": "application/json" },
+    method: "PUT"
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      "Failed to get edit photography: " + JSON.stringify(response)
+    );
+  }
+
+  const apiModel = await response.json();
+  return toAppModel(apiModel);
 }
