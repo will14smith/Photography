@@ -8,6 +8,6 @@ namespace Toxon.Photography.Models
         
         public string ImageKey { get; set; }
 
-        public DateTime CaptureTime { get; }
+        public DateTime CaptureTime { get; set; }
     }
 }
