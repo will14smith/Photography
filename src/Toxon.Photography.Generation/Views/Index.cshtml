@@ -1,0 +1,27 @@
+@using Toxon.Photography.Data
+@inherits RazorLight.TemplatePage<IEnumerable<Photograph>>
+
+@{
+    Layout = "_Shared";
+    ViewBag.Title = "Home";
+
+    var photographs = Model.ToList();
+}
+
+<div class="row align-items-center">
+    @foreach (var photograph in photographs)
+    {
+        <div class="col-md-4">
+            <div class="card mb-4 box-shadow">
+                @* TODO presign S3 url to thumbnail *@
+                <img class="card-img-top" src="@("http://via.placeholder.com/350x233?text=Processing...")" alt="@photograph.Title" title="@photograph.Title">
+            </div>
+        </div>
+    }
+    @if (!photographs.Any())
+    {
+        <div class="col-md-12">
+            <h3 class="text-muted">No images, check back later!</h3>
+        </div>
+    }
+</div>

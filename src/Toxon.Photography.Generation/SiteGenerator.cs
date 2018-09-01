@@ -1,0 +1,66 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.Extensions.FileProviders;
+using RazorLight;
+using Toxon.Photography.Data;
+using Toxon.Photography.Generation.Models;
+using File = Toxon.Photography.Generation.Models.File;
+
+namespace Toxon.Photography.Generation
+{
+    public class SiteGenerator
+    {
+        private readonly IImageProvider _imageProvider;
+        private readonly IRazorLightEngine _razor;
+        private readonly IFileProvider _assetsProvider;
+
+        public SiteGenerator(IImageProvider imageProvider)
+        {
+            _imageProvider = imageProvider;
+
+            _razor = new RazorLightEngineBuilder()
+                .UseFilesystemProject(Path.Combine(Environment.CurrentDirectory, "Views"))
+                .UseMemoryCachingProvider()
+                .Build();
+
+            _assetsProvider = new PhysicalFileProvider(Path.Combine(Environment.CurrentDirectory, "Assets"));
+        }
+
+        public Site Generate()
+        {
+            var files = new List<File>
+            {
+                new RazorFile(_razor, "Index.cshtml", _imageProvider.GetPrimaryPhotographs(), "index.html"),
+                new RazorFile(_razor, "About.cshtml", null, "about.html"),
+                new RazorFile(_razor, "Gear.cshtml", null, "gear.html"),
+            };
+
+            files.AddRange(GenerateAssets());
+
+            return new Site(files);
+        }
+
+        private IEnumerable<File> GenerateAssets()
+        {
+            foreach (var asset in _assetsProvider.GetDirectoryContents("/"))
+            {
+                if (asset.IsDirectory)
+                {
+                    throw new NotImplementedException("TODO implement recursive asset inclusion");
+                }
+
+                yield return new StaticFile(asset, "assets/" + asset.Name);
+            }
+        }
+    }
+
+    public interface IImageProvider
+    {
+        /// <summary>
+        /// Ordered list of photographs to appear on the front page
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<Photograph> GetPrimaryPhotographs();
+    }
+}

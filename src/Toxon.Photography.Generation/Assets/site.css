@@ -1,0 +1,15 @@
+﻿footer {
+    padding: 2rem 0;
+}
+
+    footer a.text-muted {
+        font-size: 1.5rem;
+    }
+
+    footer a:hover.text-muted {
+        color: #000000 !important;
+    }
+
+.box-shadow {
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
