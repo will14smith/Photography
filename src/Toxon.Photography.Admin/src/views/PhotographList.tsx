@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 
 import { Photograph } from "../api/photograph";
-import S3Image from "../components/S3Image";
+import PhotographThumbnail from "../components/PhotographThumbnail";
 import ViewHeader from "../components/ViewHeader";
 import * as redux from "../redux/photograph";
 import { RootState } from "../redux/store";
@@ -59,9 +59,9 @@ export class PhotographList extends React.Component<Props> {
                   <Link to={`/photographs/${photograph.Id}`}>
                     <div className="row align-items-center">
                       <div className="col-sm-auto">
-                        <S3Image
-                          imageKey={photograph.Images[1].ObjectKey}
-                          style={{ width: "50px" }}
+                        <PhotographThumbnail
+                          photograph={photograph}
+                          width="50px"
                         />
                       </div>
                       <div className="col-sm">

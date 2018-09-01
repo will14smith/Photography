@@ -2,7 +2,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 
 import { Photograph } from "../api/photograph";
-import S3Image from "../components/S3Image";
+import PhotographThumbnail from "../components/PhotographThumbnail";
 import ViewHeader from "../components/ViewHeader";
 import * as redux from "../redux/photograph";
 import { RootState } from "../redux/store";
@@ -50,7 +50,7 @@ export class PhotographDetail extends React.Component<Props> {
           )}
           {photograph && (
             <div>
-              <S3Image imageKey={photograph.Images[1].ObjectKey} />
+              <PhotographThumbnail photograph={photograph} width="500px" />
             </div>
           )}
         </ul>
