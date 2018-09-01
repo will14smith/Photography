@@ -19,6 +19,8 @@ export interface PhotographCreate {
   Title: string;
 
   ImageKey: string;
+
+  CaptureTime: Date;
 }
 
 export async function getAll(): Promise<Photograph[]> {

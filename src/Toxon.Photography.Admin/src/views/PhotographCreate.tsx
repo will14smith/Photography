@@ -22,6 +22,7 @@ export interface Props {
 interface State {
   title: string;
   image: File | null;
+  capture: Date;
 }
 
 function generateKey(length = 40) {
@@ -37,7 +38,7 @@ function generateKey(length = 40) {
 }
 
 export class PhotographCreate extends React.Component<Props, State> {
-  public state: State = { title: "", image: null };
+  public state: State = { title: "", image: null, capture: new Date() };
 
   constructor(props: Props) {
     super(props);
@@ -73,6 +74,18 @@ export class PhotographCreate extends React.Component<Props, State> {
             />
           </div>
 
+          <div className="form-group">
+            <label htmlFor="capture-date">Capture Date</label>
+            <input
+              id="capture"
+              required
+              value={this.state.capture.toISOString().split("T")[0]}
+              onChange={this.captureChanged}
+              type="date"
+              className="form-control"
+            />
+          </div>
+
           <button type="submit" className="btn btn-primary">
             Create
           </button>
@@ -85,6 +98,8 @@ export class PhotographCreate extends React.Component<Props, State> {
     this.setState({ title: e.target.value });
   private imageChanged = (e: React.ChangeEvent<HTMLInputElement>) =>
     this.setState({ image: e.target.files ? e.target.files[0] : null });
+  private captureChanged = (e: React.ChangeEvent<HTMLInputElement>) =>
+    this.setState({ capture: new Date(e.target.value) });
 
   private submit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -110,7 +125,9 @@ export class PhotographCreate extends React.Component<Props, State> {
       {
         Title: state.title,
 
-        ImageKey: key
+        ImageKey: key,
+
+        CaptureTime: state.capture
       },
       this.updateProgress
     );
