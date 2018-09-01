@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
@@ -8,6 +7,7 @@ using Amazon.Lambda.APIGatewayEvents;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Toxon.Photography.Config;
+using Toxon.Photography.Data;
 using Toxon.Photography.Http;
 using Toxon.Photography.Models;
 
@@ -45,7 +45,7 @@ namespace Toxon.Photography
             var photographTable = Table.LoadTable(_dynamoDb, TableNames.Photograph);
             var document = await photographTable.UpdateItemAsync(updateDocument, id, new UpdateItemOperationConfig { ReturnValues = ReturnValues.AllNewAttributes });
 
-            var photograph = ListPhotographsFunction.BuildPhotographFromDocument(document);
+            var photograph = PhotographSerialization.FromDocument(document);
             return BuildResponseFromModel(photograph);
         }
 
@@ -71,8 +71,8 @@ namespace Toxon.Photography
         {
             return new Document
             {
-                ["title"] = model.Title,
-                ["captureTime"] = model.CaptureTime,
+                [PhotographSerialization.Fields.Title] = model.Title,
+                [PhotographSerialization.Fields.CaptureTime] = model.CaptureTime,
             };
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using Toxon.Photography.Data;
 
 namespace Toxon.Photography.Models
 {

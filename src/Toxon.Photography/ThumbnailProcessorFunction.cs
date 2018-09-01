@@ -14,6 +14,7 @@ using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
 using Toxon.Photography.Config;
+using Toxon.Photography.Data;
 using Toxon.Photography.Models;
 using Image = SixLabors.ImageSharp.Image;
 
@@ -110,8 +111,8 @@ namespace Toxon.Photography
 
         private async Task UpdatePhotographInDatabase(Guid photographId, string thumbnailKey)
         {
-            var image = new Models.Image { Type = ImageType.Thumbnail, ObjectKey = thumbnailKey };
-            var imageDocument = CreatePhotographFunction.BuildDocumentFromImage(image);
+            var image = new Data.Image { Type = ImageType.Thumbnail, ObjectKey = thumbnailKey };
+            var imageDocument = ImageSerialization.ToDocument(image);
 
             await _dynamoDb.UpdateItemAsync(new UpdateItemRequest
             {

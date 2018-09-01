@@ -9,6 +9,7 @@ using Amazon.SimpleNotificationService;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Toxon.Photography.Config;
+using Toxon.Photography.Data;
 using Toxon.Photography.Http;
 using Toxon.Photography.Models;
 
@@ -40,7 +41,7 @@ namespace Toxon.Photography
             var photograph = BuildPhotographyFromModel(model);
 
             var photographTable = Table.LoadTable(_dynamoDb, TableNames.Photograph);
-            await photographTable.PutItemAsync(BuildDocumentFromPhotograph(photograph));
+            await photographTable.PutItemAsync(PhotographSerialization.ToDocument(photograph));
 
             await _sns.PublishAsync(TopicArns.ImageProcessor, JsonConvert.SerializeObject(new ImageProcessorMessage { PhotographId = photograph.Id, Image = photograph.Images.Single() }));
 
@@ -74,28 +75,6 @@ namespace Toxon.Photography
 
                 CaptureTime = model.CaptureTime,
                 UploadTime = DateTime.UtcNow,
-            };
-        }
-
-        internal static Document BuildDocumentFromPhotograph(Photograph photograph)
-        {
-            return new Document
-            {
-                ["id"] = photograph.Id.ToString(),
-                ["title"] = photograph.Title,
-                ["images"] = new DynamoDBList(photograph.Images.Select(BuildDocumentFromImage)),
-
-                ["captureTime"] = photograph.CaptureTime,
-                ["uploadTime"] = photograph.UploadTime,
-            };
-        }
-
-        internal static Document BuildDocumentFromImage(Image image)
-        {
-            return new Document
-            {
-                ["type"] = image.Type.ToString(),
-                ["objectKey"] = image.ObjectKey,
             };
         }
 

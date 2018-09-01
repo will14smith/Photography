@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -7,8 +6,8 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.Lambda.APIGatewayEvents;
 using Toxon.Photography.Config;
+using Toxon.Photography.Data;
 using Toxon.Photography.Http;
-using Toxon.Photography.Models;
 
 namespace Toxon.Photography
 {
@@ -31,34 +30,10 @@ namespace Toxon.Photography
             var search = photographTable.Scan(new ScanFilter());
 
             var documents = await search.GetAllAsync();
-            var models = documents.Select(BuildPhotographFromDocument);
+            var models = documents.Select(PhotographSerialization.FromDocument);
 
             return BuildResponseFromModels(models);
         }
-
-        internal static Photograph BuildPhotographFromDocument(Document document)
-        {
-            return new Photograph
-            {
-                Id = document["id"].AsGuid(),
-                Title = document["title"].AsString(),
-
-                Images = document["images"].AsListOfDocument().Select(BuildImageFromDocument).ToList(),
-
-                CaptureTime = document["captureTime"].AsDateTime(),
-                UploadTime = document["uploadTime"].AsDateTime(),
-            };
-        }
-
-        private static Image BuildImageFromDocument(Document document)
-        {
-            return new Image
-            {
-                Type = Enum.Parse<ImageType>(document["type"].AsString()),
-                ObjectKey = document["objectKey"].AsString(),
-            };
-        }
-
 
         internal static APIGatewayProxyResponse BuildResponseFromModels(IEnumerable<Photograph> models)
         {

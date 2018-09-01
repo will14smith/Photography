@@ -5,8 +5,8 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.Lambda.APIGatewayEvents;
 using Toxon.Photography.Config;
+using Toxon.Photography.Data;
 using Toxon.Photography.Http;
-using Toxon.Photography.Models;
 
 namespace Toxon.Photography
 {
@@ -38,7 +38,7 @@ namespace Toxon.Photography
                 return Response.CreateError(HttpStatusCode.NotFound, "No photograph with the requested id was found");
             }
 
-            var model = ListPhotographsFunction.BuildPhotographFromDocument(document);
+            var model = PhotographSerialization.FromDocument(document);
 
             return BuildResponseFromModel(model);
         }
