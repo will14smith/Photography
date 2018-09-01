@@ -44,6 +44,9 @@ namespace Toxon.Photography
                 Title = document["title"].AsString(),
 
                 Images = document["images"].AsListOfDocument().Select(BuildImageFromDocument).ToList(),
+
+                CaptureTime = document["captureTime"].AsDateTime(),
+                UploadTime = document["uploadTime"].AsDateTime(),
             };
         }
 

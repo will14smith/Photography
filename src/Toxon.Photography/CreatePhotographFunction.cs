@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -72,7 +70,10 @@ namespace Toxon.Photography
             return new Photograph
             {
                 Title = model.Title,
-                Images = new[] { new Image { Type = ImageType.Full, ObjectKey = model.ImageKey } }
+                Images = new[] { new Image { Type = ImageType.Full, ObjectKey = model.ImageKey } },
+
+                CaptureTime = model.CaptureTime,
+                UploadTime = DateTime.UtcNow,
             };
         }
 
@@ -83,6 +84,9 @@ namespace Toxon.Photography
                 ["id"] = photograph.Id.ToString(),
                 ["title"] = photograph.Title,
                 ["images"] = new DynamoDBList(photograph.Images.Select(BuildDocumentFromImage)),
+
+                ["captureTime"] = photograph.CaptureTime,
+                ["uploadTime"] = photograph.UploadTime,
             };
         }
 
