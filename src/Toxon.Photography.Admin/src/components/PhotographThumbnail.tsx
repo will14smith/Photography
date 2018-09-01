@@ -10,11 +10,9 @@ export interface Props {
 
 export default function PhotographThumbnail({ photograph, width }: Props) {
   const thumbnail = photograph.Images.find(x => x.Type === ImageType.Thumbnail);
-  if (thumbnail === null) {
+  if (!thumbnail) {
     return <img src={`https://via.placeholder.com/${width}`} />;
   }
 
-  return (
-    <S3Image imageKey={photograph.Images[1].ObjectKey} style={{ width }} />
-  );
+  return <S3Image imageKey={thumbnail.ObjectKey} style={{ width }} />;
 }
