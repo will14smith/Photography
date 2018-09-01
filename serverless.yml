@@ -2,6 +2,8 @@ service: photography
 
 custom:
   imageProcessorTopicName: ${self:service}-${self:provider.stage}-imageprocessor
+  staticSiteCertificateArn: ${file(./serverless.${self:provider.stage}.json):staticSiteCertificateArn}
+  staticSiteHostNames: ${file(./serverless.${self:provider.stage}.json):staticSiteHostNames}
 
 provider:
   name: aws
@@ -31,3 +33,4 @@ resources:
   - ${file(infrastructure/resources-iam.yml)}
   - ${file(infrastructure/resources-s3.yml)}
   - ${file(infrastructure/resources-sns.yml)}
+  - ${file(infrastructure/resources-cloudfront.yml)}

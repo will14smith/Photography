@@ -1,0 +1,34 @@
+Resources:
+  StaticSiteDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases: ${self:custom.staticSiteHostNames}
+        DefaultCacheBehavior:
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+          TargetOriginId: s3
+          ViewerProtocolPolicy: redirect-to-https
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: true
+        Origins:
+          - DomainName: ${self:provider.environment.SITE_BUCKET}.s3.amazonaws.com
+            Id: s3
+            S3OriginConfig: {}
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: ${self:custom.staticSiteCertificateArn}
+          MinimumProtocolVersion: TLSv1.1_2016
+          SslSupportMethod: sni-only
+
+Outputs:
+  StaticSiteDomain:
+    Description: The domain name to configure as CNAME target for the static site
+    Value:
+      Fn::GetAtt: [StaticSiteDistribution, DomainName]
+    Export:
+      Name: ${self:service}:${self:provider.stage}:StaticSiteDomain
