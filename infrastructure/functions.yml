@@ -35,6 +35,21 @@ get-photograph:
           type: COGNITO_USER_POOLS
           authorizerId:
             Ref: ApiGatewayAuthorizer
+edit-photograph:
+  handler: Toxon.Photography::Toxon.Photography.EditPhotographFunction::Handle
+  events:
+    - http:
+        path: photograph/{id}
+        method: put
+        request:
+          parameters:
+            paths:
+              id: true
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId:
+            Ref: ApiGatewayAuthorizer
 
 # image processors
 thumbnail-processor:
