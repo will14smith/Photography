@@ -60,12 +60,12 @@ namespace Toxon.Photography
             return true;
         }
 
-        internal static PhotographyInputModel BuildModelFromRequest(string body)
+        internal static PhotographyCreateModel BuildModelFromRequest(string body)
         {
-            return JsonConvert.DeserializeObject<PhotographyInputModel>(body);
+            return JsonConvert.DeserializeObject<PhotographyCreateModel>(body);
         }
 
-        internal static Photograph BuildPhotographyFromModel(PhotographyInputModel model)
+        internal static Photograph BuildPhotographyFromModel(PhotographyCreateModel model)
         {
             return new Photograph
             {
