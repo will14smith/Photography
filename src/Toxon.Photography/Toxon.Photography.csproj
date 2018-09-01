@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Toxon.Photography.Data\Toxon.Photography.Data.csproj" />
+    <ProjectReference Include="..\Toxon.Photography.Generation\Toxon.Photography.Generation.csproj" />
   </ItemGroup>
 
 </Project>

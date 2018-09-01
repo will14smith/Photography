@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using RazorLight;
-using Toxon.Photography.Data;
 using Toxon.Photography.Generation.Models;
 using File = Toxon.Photography.Generation.Models.File;
 
@@ -27,11 +27,11 @@ namespace Toxon.Photography.Generation
             _assetsProvider = new PhysicalFileProvider(Path.Combine(Environment.CurrentDirectory, "Assets"));
         }
 
-        public Site Generate()
+        public async Task<Site> GenerateAsync()
         {
             var files = new List<File>
             {
-                new RazorFile(_razor, "Index.cshtml", _imageProvider.GetPrimaryPhotographs(), "index.html"),
+                new RazorFile(_razor, "Index.cshtml", await _imageProvider.GetPrimaryPhotographsAsync(), "index.html"),
                 new RazorFile(_razor, "About.cshtml", null, "about.html"),
                 new RazorFile(_razor, "Gear.cshtml", null, "gear.html"),
             };
@@ -53,14 +53,5 @@ namespace Toxon.Photography.Generation
                 yield return new StaticFile(asset, "assets/" + asset.Name);
             }
         }
-    }
-
-    public interface IImageProvider
-    {
-        /// <summary>
-        /// Ordered list of photographs to appear on the front page
-        /// </summary>
-        /// <returns></returns>
-        IEnumerable<Photograph> GetPrimaryPhotographs();
     }
 }
