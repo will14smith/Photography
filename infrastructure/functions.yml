@@ -62,3 +62,8 @@ thumbnail-processor:
         # ideally this would be `Fn::GetAtt: [ImageProcessorTopic, TopicName]`
         # but there seems to be bug where topicName must be a string if arn is ref
         topicName: ${self:custom.imageProcessorTopicName}
+
+# site generator
+site-generator:
+  handler: Toxon.Photography::Toxon.Photography.SiteGeneratorFunction::Handle
+  timeout: 300

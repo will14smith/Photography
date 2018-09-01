@@ -14,6 +14,7 @@ provider:
     IMAGE_BUCKET: ${self:service}-${self:provider.stage}-image
     IMAGE_PROCESSOR_TOPIC_ARN:
       Ref: ImageProcessorTopic
+    SITE_BUCKET: ${self:service}-${self:provider.stage}-site
 
   iamRoleStatements: ${file(infrastructure/provider-iam.yml)}
 

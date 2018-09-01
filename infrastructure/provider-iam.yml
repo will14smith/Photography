@@ -21,6 +21,15 @@
         - "*"
 - Effect: Allow
   Action:
+    - s3:PutObject
+    - s3:DeleteObject
+  Resource:
+    Fn::Join:
+      - "/"
+      - - Fn::GetAtt: [SiteBucket, Arn]
+        - "*"
+- Effect: Allow
+  Action:
     - sns:Publish
   Resource:
     Ref: ImageProcessorTopic

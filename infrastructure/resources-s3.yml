@@ -17,6 +17,35 @@ Resources:
               - "*"
             ExposedHeaders:
               - ETag
+
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      BucketName: ${self:provider.environment.SITE_BUCKET}
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: SiteBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource:
+              Fn::Join:
+                - "/"
+                - - Fn::GetAtt:
+                      - SiteBucket
+                      - Arn
+                  - "*"
+
 Outputs:
   ImageBucket:
     Description: The ImageBucket for the frontend
