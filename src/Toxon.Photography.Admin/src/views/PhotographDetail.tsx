@@ -51,6 +51,12 @@ export class PhotographDetail extends React.Component<Props> {
           {photograph && (
             <div>
               <PhotographThumbnail photograph={photograph} width="500px" />
+              <dl>
+                <dt>Capture Date</dt>
+                <dd>{photograph.CaptureTime.toDateString()}</dd>
+                <dt>Upload Date</dt>
+                <dd>{photograph.UploadTime.toDateString()}</dd>
+              </dl>
             </div>
           )}
         </ul>

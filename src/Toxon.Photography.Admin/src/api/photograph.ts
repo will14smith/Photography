@@ -13,6 +13,9 @@ export interface Photograph {
   Title: string;
 
   Images: Image[];
+
+  CaptureTime: Date;
+  UploadTime: Date;
 }
 
 export interface PhotographCreate {
@@ -21,6 +24,14 @@ export interface PhotographCreate {
   ImageKey: string;
 
   CaptureTime: Date;
+}
+
+function toAppModel(apiModel: any): Photograph {
+  return {
+    ...apiModel,
+    CaptureTime: new Date(apiModel.CaptureTime),
+    UploadTime: new Date(apiModel.UploadTime)
+  };
 }
 
 export async function getAll(): Promise<Photograph[]> {
@@ -34,7 +45,9 @@ export async function getAll(): Promise<Photograph[]> {
     );
   }
 
-  return await response.json();
+  const apiModels = await response.json();
+
+  return apiModels.map(toAppModel);
 }
 
 export async function get(id: string): Promise<Photograph> {
@@ -46,7 +59,8 @@ export async function get(id: string): Promise<Photograph> {
     throw new Error("Failed to get photograph: " + JSON.stringify(response));
   }
 
-  return await response.json();
+  const apiModel = await response.json();
+  return toAppModel(apiModel);
 }
 
 export async function create(model: PhotographCreate): Promise<Photograph> {
