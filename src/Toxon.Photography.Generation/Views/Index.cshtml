@@ -1,5 +1,5 @@
-@using Toxon.Photography.Data
-@inherits RazorLight.TemplatePage<IEnumerable<Photograph>>
+@using Toxon.Photography.Generation.Models
+@inherits RazorLight.TemplatePage<IEnumerable<PhotographViewModel>>
 
 @{
     Layout = "_Shared";
@@ -9,12 +9,13 @@
 }
 
 <div class="row align-items-center">
-    @foreach (var photograph in photographs)
+    @foreach (var vm in photographs)
     {
+        var photograph = vm.Photograph;
+
         <div class="col-md-4">
             <div class="card mb-4 box-shadow">
-                @* TODO presign S3 url to thumbnail *@
-                <img class="card-img-top" src="@("http://via.placeholder.com/350x233?text=Processing...")" alt="@photograph.Title" title="@photograph.Title">
+                <img class="card-img-top" src="@(vm.ThumbnailUrl ?? "http://via.placeholder.com/350x233?text=Processing...")" alt="@photograph.Title" title="@photograph.Title">
             </div>
         </div>
     }

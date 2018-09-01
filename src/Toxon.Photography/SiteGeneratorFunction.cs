@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace Toxon.Photography
 
         public async Task Handle()
         {
-            var provider = new DynamoDBImageProvider(_dynamoDb);
+            var provider = new DynamoDBImageProvider(_dynamoDb, _s3, BucketNames.Images);
             var generator = new SiteGenerator(provider);
 
             var site = await generator.GenerateAsync();
@@ -43,19 +44,46 @@ namespace Toxon.Photography
 
     public class DynamoDBImageProvider : IImageProvider
     {
+        private readonly IAmazonS3 _s3;
+        private readonly string _bucket;
+
         private readonly Table _photographs;
 
-        public DynamoDBImageProvider(IAmazonDynamoDB dynamoDb)
+        public DynamoDBImageProvider(IAmazonDynamoDB dynamoDb, IAmazonS3 s3, string bucket)
         {
+            _s3 = s3;
+            _bucket = bucket;
+
             _photographs = Table.LoadTable(dynamoDb, TableNames.Photograph);
         }
 
-        public async Task<IEnumerable<Photograph>> GetPrimaryPhotographsAsync()
+        public async Task<IEnumerable<PhotographViewModel>> GetPrimaryPhotographsAsync()
         {
             var search = _photographs.Scan(new ScanFilter());
 
             var documents = await search.GetAllAsync();
-            return documents.Select(PhotographSerialization.FromDocument);
+            return documents
+                .Select(PhotographSerialization.FromDocument)
+                .Select(ToViewModel);
+        }
+
+        private PhotographViewModel ToViewModel(Photograph photograph)
+        {
+            string thumbnailUrl = null;
+
+            var thumbnail = photograph.Images.FirstOrDefault(x => x.Type == ImageType.Thumbnail);
+            if (thumbnail != null)
+            {
+                thumbnailUrl = _s3.GetPreSignedURL(new GetPreSignedUrlRequest
+                {
+                    BucketName = _bucket,
+                    Key = thumbnail.ObjectKey,
+
+                    Expires = DateTime.UtcNow.AddDays(2),
+                });
+            }
+
+            return new PhotographViewModel(photograph, thumbnailUrl);
         }
     }
 
