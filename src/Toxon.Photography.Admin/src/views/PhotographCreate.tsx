@@ -143,8 +143,7 @@ export function mapDispatchToProps(dispatch: Dispatch) {
     createPhotograph: async (model: PhotographCreateModel) => {
       const response = await create(model);
 
-      // TODO redirect to photograph details
-      dispatch(push("/photographs"));
+      dispatch(push(`/photographs/${response.Id}`));
 
       return response;
     }
