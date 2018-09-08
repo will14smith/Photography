@@ -25,6 +25,12 @@ const AppSidebar = ({ onLogout, username }: Props) => {
             <Icon.Image size="16" /> Photographs
           </NavLink>
         </li>
+
+        <li className="nav-item">
+          <NavLink className="nav-link" to="/layout">
+            <Icon.Grid size="16" /> Layout
+          </NavLink>
+        </li>
       </ul>
 
       <h6 className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">

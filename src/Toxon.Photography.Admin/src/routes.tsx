@@ -2,6 +2,7 @@ import * as React from "react";
 import { Route, Switch } from "react-router";
 
 import Home from "./views/Home";
+import Layout from "./views/Layout";
 import NotFound from "./views/NotFound";
 import PhotographCreate from "./views/PhotographCreate";
 import PhotographDetail from "./views/PhotographDetail";
@@ -15,6 +16,7 @@ const routes = (
     <Route path="/photographs/:id/edit" component={PhotographEdit} />
     <Route path="/photographs/:id" component={PhotographDetail} />
     <Route path="/photographs" component={PhotographList} />
+    <Route path="/layout" component={Layout} />
     <Route component={NotFound} />
   </Switch>
 );

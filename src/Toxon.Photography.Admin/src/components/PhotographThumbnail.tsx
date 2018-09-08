@@ -5,13 +5,13 @@ import S3Image from "./S3Image";
 
 export interface Props {
   photograph: Photograph;
-  width: string;
+  width?: string;
 }
 
 export default function PhotographThumbnail({ photograph, width }: Props) {
   const thumbnail = photograph.Images.find(x => x.Type === ImageType.Thumbnail);
   if (!thumbnail) {
-    return <img src={`https://via.placeholder.com/${width}`} />;
+    return <img src={`https://via.placeholder.com/${width || "350px"}`} />;
   }
 
   return <S3Image imageKey={thumbnail.ObjectKey} style={{ width }} />;
