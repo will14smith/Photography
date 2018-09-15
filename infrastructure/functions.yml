@@ -78,3 +78,6 @@ thumbnail-processor:
 site-generator:
   handler: Toxon.Photography::Toxon.Photography.SiteGeneratorFunction::Handle
   timeout: 300
+  events:
+    - schedule:
+        rate: rate(1 day)

@@ -59,11 +59,14 @@ namespace Toxon.Photography
 
         public async Task<IEnumerable<PhotographViewModel>> GetPrimaryPhotographsAsync()
         {
-            var search = _photographs.Scan(new ScanFilter());
+            var filter = new ScanFilter();
+            filter.AddCondition(PhotographSerialization.Fields.LayoutPosition, ScanOperator.IsNotNull);
+            var search = _photographs.Scan(filter);
 
             var documents = await search.GetAllAsync();
             return documents
                 .Select(PhotographSerialization.FromDocument)
+                .OrderBy(x => x.LayoutPosition)
                 .Select(ToViewModel);
         }
 
