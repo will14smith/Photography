@@ -1,12 +1,15 @@
 import * as React from "react";
+import * as Icon from "react-feather";
 import { connect } from "react-redux";
 
 import { Photograph } from "../api/photograph";
-import * as redux from "../redux/photograph";
+import * as layoutRedux from "../redux/layout";
+import * as photographRedux from "../redux/photograph";
 import { RootState } from "../redux/store";
 import { Dispatch } from "../redux/types";
 
-import PhotographThumbnail from "../components/PhotographThumbnail";
+import AvailablePhotographRow from "../components/AvailablePhotographRow";
+import LayoutPhotographCell from "../components/LayoutPhotographCell";
 import ViewHeader from "../components/ViewHeader";
 
 import "./Layout.css";
@@ -14,46 +17,15 @@ import "./Layout.css";
 export interface Props {
   getPhotographs: () => void;
 
+  resetLayout: () => void;
+  saveLayout: (ids: string[]) => void;
+  setLayout: (ids: string[]) => void;
+
   loading: boolean;
   error?: Error;
+
   photographs: Photograph[];
-}
-
-function AvailablePhotographRow({
-  photograph,
-  onClick
-}: {
-  photograph: Photograph;
-  onClick?: () => void;
-}) {
-  return (
-    <li className="list-group-item" onClick={onClick}>
-      <div className="row align-items-center">
-        <div className="col-sm-auto">
-          <PhotographThumbnail photograph={photograph} width="50px" />
-        </div>
-        <div className="col-sm">
-          <h3>{photograph.Title}</h3>
-        </div>
-      </div>
-    </li>
-  );
-}
-
-function LayoutPhotographCell({
-  photograph,
-  onClick
-}: {
-  photograph: Photograph;
-  onClick?: () => void;
-}) {
-  return (
-    <div className="col-md-4 layout-cell">
-      <div className="card mb-4 box-shadow">
-        <PhotographThumbnail photograph={photograph} />
-      </div>
-    </div>
-  );
+  layout: string[];
 }
 
 class Layout extends React.Component<Props> {
@@ -63,6 +35,10 @@ class Layout extends React.Component<Props> {
 
   public componentDidMount() {
     this.props.getPhotographs();
+  }
+
+  public componentWillUnmount() {
+    this.props.resetLayout();
   }
 
   public render() {
@@ -78,14 +54,25 @@ class Layout extends React.Component<Props> {
       );
     }
 
-    const layoutPhotos = this.props.photographs;
-    const availablePhotos = this.props.photographs;
+    const layoutPhotos = this.props.photographs
+      .filter(x => x.LayoutPosition !== undefined)
+      .sort((a, b) => (a.LayoutPosition || 0) - (b.LayoutPosition || 0));
+    const availablePhotos = this.props.photographs.filter(
+      x => x.LayoutPosition === undefined
+    );
 
     return (
       <div className="container-fluid">
         <div className="row layout-header">
           <div className="col">
-            <ViewHeader title="Layout" />
+            <ViewHeader title="Layout">
+              <a
+                onClick={this.save}
+                className="btn btn-sm btn-outline-secondary"
+              >
+                <Icon.Save />
+              </a>
+            </ViewHeader>
           </div>
         </div>
         <div className="row">
@@ -96,6 +83,7 @@ class Layout extends React.Component<Props> {
                   <LayoutPhotographCell
                     key={photograph.Id}
                     photograph={photograph}
+                    onClick={this.movePhotograph.bind(this, photograph.Id)}
                   />
                 ))}
                 {layoutPhotos.length !== 0 || (
@@ -114,6 +102,7 @@ class Layout extends React.Component<Props> {
                   <AvailablePhotographRow
                     key={photograph.Id}
                     photograph={photograph}
+                    onClick={this.addPhotograph.bind(this, photograph.Id)}
                   />
                 ))
               ) : (
@@ -121,27 +110,69 @@ class Layout extends React.Component<Props> {
                   No photographs available
                 </li>
               )}
-            </ul>{" "}
+            </ul>
           </div>
         </div>
       </div>
     );
   }
+
+  private save = () => {
+    this.props.saveLayout(this.props.layout);
+  };
+
+  private addPhotograph = (photographId: string) => {
+    const { layout, setLayout } = this.props;
+
+    setLayout([...layout, photographId]);
+  };
+  private movePhotograph = (photographId: string) => {
+    const { layout, setLayout } = this.props;
+
+    const index = layout.indexOf(photographId);
+    if (index + 1 === layout.length) {
+      setLayout(layout.slice(0, layout.length - 1));
+    } else {
+      const newLayout = [...layout];
+      newLayout[index] = layout[index + 1];
+      newLayout[index + 1] = photographId;
+      setLayout(newLayout);
+    }
+  };
 }
 
-export function mapStateToProps({ photographs }: RootState) {
-  const all = photographs.ids.map(id => photographs.byId[id]);
+function findLayoutPosition(layout: string[], id: string): number | undefined {
+  const index = layout.indexOf(id);
+
+  if (index === -1) {
+    return undefined;
+  }
+  return index;
+}
+
+export function mapStateToProps({ photographs, layout }: RootState) {
+  const currentLayout = layout.currentLayout;
+  const all = photographs.ids.map(id => ({
+    ...photographs.byId[id],
+    LayoutPosition: findLayoutPosition(currentLayout, id)
+  }));
 
   return {
     error: photographs.error,
     loading: photographs.loading,
+
+    layout: currentLayout,
     photographs: all
   };
 }
 
 export function mapDispatchToProps(dispatch: Dispatch) {
   return {
-    getPhotographs: () => dispatch(redux.getPhotographs())
+    getPhotographs: () => dispatch(photographRedux.getPhotographs()),
+
+    resetLayout: () => dispatch(layoutRedux.resetLayout()),
+    saveLayout: (ids: string[]) => dispatch(layoutRedux.saveLayout(ids)),
+    setLayout: (ids: string[]) => dispatch(layoutRedux.setLayout(ids))
   };
 }
 

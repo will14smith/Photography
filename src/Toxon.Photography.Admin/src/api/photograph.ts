@@ -11,6 +11,7 @@ export interface Image {
 export interface Photograph {
   Id: string;
   Title: string;
+  LayoutPosition?: number;
 
   Images: Image[];
 
