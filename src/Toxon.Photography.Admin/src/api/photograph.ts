@@ -35,6 +35,12 @@ export interface PhotographEdit {
 function toAppModel(apiModel: any): Photograph {
   return {
     ...apiModel,
+
+    LayoutPosition:
+      apiModel.LayoutPosition === null || apiModel.LayoutPosition === undefined
+        ? undefined
+        : apiModel.LayoutPosition,
+
     CaptureTime: new Date(apiModel.CaptureTime),
     UploadTime: new Date(apiModel.UploadTime)
   };
