@@ -37,7 +37,7 @@ namespace Toxon.Photography.Data
                 Id = document[Fields.Id].AsGuid(),
 
                 Title = document[Fields.Title].AsString(),
-                LayoutPosition = document[Fields.LayoutPosition].AsIntNullable(),
+                LayoutPosition = document.TryGetNull(Fields.LayoutPosition).AsIntNullable(),
 
                 Images = document[Fields.Images].AsListOfDocument().Select(ImageSerialization.FromDocument).ToList(),
 

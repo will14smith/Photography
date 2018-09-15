@@ -73,6 +73,7 @@ namespace Toxon.Photography
             var search = table.Scan(new ScanOperationConfig
             {
                 AttributesToGet = new List<string> { PhotographSerialization.Fields.Id },
+                Select = SelectValues.SpecificAttributes,
             });
 
             var documents = await search.GetAllAsync();
