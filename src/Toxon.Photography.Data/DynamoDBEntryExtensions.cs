@@ -8,7 +8,17 @@ namespace Toxon.Photography.Data
     {
         public static T AsEnum<T>(this DynamoDBEntry entry)
         {
-            return (T) Enum.Parse(typeof(T), entry.AsString());
+            return (T)Enum.Parse(typeof(T), entry.AsString());
+        }
+
+        public static int? AsIntNullable(this DynamoDBEntry entry)
+        {
+            if (entry is DynamoDBNull)
+            {
+                return null;
+            }
+
+            return entry.AsInt();
         }
     }
 }

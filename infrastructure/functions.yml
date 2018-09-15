@@ -50,6 +50,17 @@ edit-photograph:
           type: COGNITO_USER_POOLS
           authorizerId:
             Ref: ApiGatewayAuthorizer
+edit-layout:
+  handler: Toxon.Photography::Toxon.Photography.EditLayoutFunction::Handle
+  events:
+    - http:
+        path: layout
+        method: put
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId:
+            Ref: ApiGatewayAuthorizer
 
 # image processors
 thumbnail-processor:
