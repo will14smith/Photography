@@ -28,11 +28,12 @@ export default class S3Image extends React.Component<Props, State> {
 
   public render() {
     const { loading, src } = this.state;
+    const { imageKey, ...props } = this.props;
 
     return loading ? (
-      <div {...this.props}>Loading...</div>
+      <div {...props}>Loading...</div>
     ) : (
-      <img {...this.props} src={src} />
+      <img {...props} src={src} />
     );
   }
 
