@@ -81,3 +81,17 @@ site-generator:
   events:
     - schedule:
         rate: rate(1 day)
+    - http:
+        path: generate
+        method: post
+        cors: true
+        # this function isn't configure for lambda_proxy so should just return a 204 using direct lambda invoke
+        integration: lambda
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId:
+            Ref: ApiGatewayAuthorizer
+        response:
+          statusCodes:
+            204:
+              pattern: ""
