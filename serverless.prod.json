@@ -1,4 +1,4 @@
 {
-  "staticSiteCertificateArn": "TODO",
+  "staticSiteCertificateArn": "arn:aws:acm:us-east-1:682179218046:certificate/6cc4623e-c061-41b8-85b3-ed0c4a67b39d",
   "staticSiteHostNames": ["toxon.co.uk", "www.toxon.co.uk"]
 }
