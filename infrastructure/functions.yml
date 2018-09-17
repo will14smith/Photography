@@ -66,6 +66,7 @@ edit-layout:
 thumbnail-processor:
   handler: Toxon.Photography::Toxon.Photography.ThumbnailProcessorFunction::Handle
   timeout: 300
+  memorySize: 3008
   events:
     - sns:
         arn:
