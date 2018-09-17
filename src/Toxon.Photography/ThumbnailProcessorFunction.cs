@@ -54,7 +54,8 @@ namespace Toxon.Photography
             var stream = await GetImageFromS3(message.Image.ObjectKey);
             var (thumbnail, format) = ProcessImage(stream);
             var thumbnailKey = await UploadImageToS3(thumbnail, format);
-
+            thumbnail.Dispose();
+            
             await UpdatePhotographInDatabase(message.PhotographId, thumbnailKey);
         }
 
