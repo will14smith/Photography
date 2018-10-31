@@ -15,7 +15,7 @@ export default function LayoutPhotographCell({ photograph, onClick }: Props) {
   return (
     <div className={`col-md-${4 * width} layout-cell`} onClick={onClick}>
       <div className="card mb-4 box-shadow">
-        <PhotographThumbnail photograph={photograph} />
+        <PhotographThumbnail photograph={photograph} width="100%" />
       </div>
     </div>
   );
