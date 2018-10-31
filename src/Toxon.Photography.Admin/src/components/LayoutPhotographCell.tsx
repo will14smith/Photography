@@ -9,8 +9,11 @@ export interface Props {
 }
 
 export default function LayoutPhotographCell({ photograph, onClick }: Props) {
+  const width = (photograph.Layout || { Width: 1 }).Width || 1;
+  // TODO handle height
+
   return (
-    <div className="col-md-4 layout-cell" onClick={onClick}>
+    <div className={`col-md-${4 * width} layout-cell`} onClick={onClick}>
       <div className="card mb-4 box-shadow">
         <PhotographThumbnail photograph={photograph} />
       </div>
