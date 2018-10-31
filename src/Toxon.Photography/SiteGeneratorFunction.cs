@@ -72,7 +72,7 @@ namespace Toxon.Photography
             var documents = await search.GetAllAsync();
             return documents
                 .Select(PhotographSerialization.FromDocument)
-                .OrderBy(x => x.Layout)
+                .OrderBy(x => x.Layout.Order)
                 .Select(ToViewModel);
         }
 
