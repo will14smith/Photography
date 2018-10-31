@@ -1,8 +1,17 @@
 import { fetchWithAuthentication } from "./fetch";
 
-export interface LayoutEdit {
-  [id: string]: number;
+export interface LayoutModel {
+  Order: number;
+
+  Width: number | null;
+  Height: number | null;
 }
+
+export interface Layout {
+  [id: string]: LayoutModel;
+}
+
+export type LayoutEdit = Layout;
 
 export async function edit(model: LayoutEdit): Promise<void> {
   const response = await fetchWithAuthentication(`/layout`, {

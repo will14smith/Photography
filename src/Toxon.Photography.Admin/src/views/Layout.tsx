@@ -2,6 +2,7 @@ import * as React from "react";
 import * as Icon from "react-feather";
 import { connect } from "react-redux";
 
+import { LayoutModel } from "../api/layout";
 import { Photograph } from "../api/photograph";
 import * as layoutRedux from "../redux/layout";
 import * as photographRedux from "../redux/photograph";
@@ -18,14 +19,14 @@ export interface Props {
   getPhotographs: () => void;
 
   resetLayout: () => void;
-  saveLayout: (ids: string[]) => void;
-  setLayout: (ids: string[]) => void;
+  saveLayout: (ids: layoutRedux.LayoutItem[]) => void;
+  setLayout: (ids: layoutRedux.LayoutItem[]) => void;
 
   loading: boolean;
   error?: Error;
 
   photographs: Photograph[];
-  layout: string[];
+  layout: layoutRedux.LayoutItem[];
 }
 
 class Layout extends React.Component<Props> {
@@ -55,10 +56,13 @@ class Layout extends React.Component<Props> {
     }
 
     const layoutPhotos = this.props.photographs
-      .filter(x => x.LayoutPosition !== undefined)
-      .sort((a, b) => (a.LayoutPosition || 0) - (b.LayoutPosition || 0));
+      .filter(x => x.Layout !== undefined)
+      .sort(
+        (a, b) =>
+          (a.Layout || { Order: 0 }).Order - (b.Layout || { Order: 0 }).Order
+      );
     const availablePhotos = this.props.photographs.filter(
-      x => x.LayoutPosition === undefined
+      x => x.Layout === undefined
     );
 
     return (
@@ -124,37 +128,43 @@ class Layout extends React.Component<Props> {
   private addPhotograph = (photographId: string) => {
     const { layout, setLayout } = this.props;
 
-    setLayout([...layout, photographId]);
+    setLayout([...layout, { id: photographId, width: null, height: null }]);
   };
   private movePhotograph = (photographId: string) => {
     const { layout, setLayout } = this.props;
 
-    const index = layout.indexOf(photographId);
+    const index = layout.findIndex(x => x.id === photographId);
     if (index + 1 === layout.length) {
       setLayout(layout.slice(0, layout.length - 1));
     } else {
       const newLayout = [...layout];
+      const photographLayoutItem = newLayout[index];
       newLayout[index] = layout[index + 1];
-      newLayout[index + 1] = photographId;
+      newLayout[index + 1] = photographLayoutItem;
       setLayout(newLayout);
     }
   };
 }
 
-function findLayoutPosition(layout: string[], id: string): number | undefined {
-  const index = layout.indexOf(id);
+function findLayout(
+  layout: layoutRedux.LayoutItem[],
+  id: string
+): LayoutModel | undefined {
+  const index = layout.findIndex(x => x.id === id);
 
   if (index === -1) {
     return undefined;
   }
-  return index;
+
+  const item = layout[index];
+  return { Order: index, Width: item.width, Height: item.height };
 }
 
 export function mapStateToProps({ photographs, layout }: RootState) {
   const currentLayout = layout.currentLayout;
   const all = photographs.ids.map(id => ({
     ...photographs.byId[id],
-    LayoutPosition: findLayoutPosition(currentLayout, id)
+    Layout: findLayout(currentLayout, id)
   }));
 
   return {
@@ -171,8 +181,10 @@ export function mapDispatchToProps(dispatch: Dispatch) {
     getPhotographs: () => dispatch(photographRedux.getPhotographs()),
 
     resetLayout: () => dispatch(layoutRedux.resetLayout()),
-    saveLayout: (ids: string[]) => dispatch(layoutRedux.saveLayout(ids)),
-    setLayout: (ids: string[]) => dispatch(layoutRedux.setLayout(ids))
+    saveLayout: (ids: layoutRedux.LayoutItem[]) =>
+      dispatch(layoutRedux.saveLayout(ids)),
+    setLayout: (ids: layoutRedux.LayoutItem[]) =>
+      dispatch(layoutRedux.setLayout(ids))
   };
 }
 

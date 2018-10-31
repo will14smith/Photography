@@ -9,6 +9,13 @@ import {
 import { RootState } from "./store";
 import { Action } from "./types";
 
+export interface LayoutItem {
+  id: string;
+
+  width: number | null;
+  height: number | null;
+}
+
 // Actions
 
 export const RESET_LAYOUT = "RESET_LAYOUT";
@@ -21,26 +28,30 @@ export interface ResetLayout {
 }
 export interface SetLayout {
   type: SET_LAYOUT;
-  ids: string[];
+  layout: LayoutItem[];
 }
 
 export function resetLayout(): ResetLayout {
   return { type: RESET_LAYOUT };
 }
-export function saveLayout(ids: string[]): Action {
+export function saveLayout(model: LayoutItem[]): Action {
   return async (
     dispatch: Dispatch<LayoutAction | PhotographAction>,
     getState: () => RootState
   ) => {
-    const model = {};
-    ids.forEach((id, idx) => (model[id] = idx));
-    await layoutApi.edit(model);
+    const edit: layoutApi.LayoutEdit = {};
+
+    model.forEach((item, idx) => {
+      edit[item.id] = { Order: idx, Width: item.width, Height: item.height };
+    });
+
+    await layoutApi.edit(edit);
 
     return getPhotographs()(dispatch, getState, null);
   };
 }
-export function setLayout(ids: string[]): SetLayout {
-  return { type: SET_LAYOUT, ids };
+export function setLayout(layout: LayoutItem[]): SetLayout {
+  return { type: SET_LAYOUT, layout };
 }
 
 export type LayoutAction = ResetLayout | SetLayout;
@@ -48,9 +59,9 @@ export type LayoutAction = ResetLayout | SetLayout;
 // State
 
 export interface State {
-  initialLayout: string[];
+  initialLayout: LayoutItem[];
 
-  currentLayout: string[];
+  currentLayout: LayoutItem[];
 }
 
 const initialState: State = {
@@ -67,14 +78,22 @@ export function reducer(
   switch (action.type) {
     case "GET_PHOTOGRAPHS_SUCCEEDED":
       const layout = action.photographs
-        .filter(x => x.LayoutPosition !== undefined)
-        .sort((a, b) => (a.LayoutPosition || 0) - (b.LayoutPosition || 0))
-        .map(x => x.Id);
+        .filter(x => x.Layout !== undefined)
+        .sort(
+          (a, b) =>
+            (a.Layout || { Order: 0 }).Order - (b.Layout || { Order: 0 }).Order
+        )
+        .map(x => ({
+          id: x.Id,
+
+          height: x.Layout ? x.Layout.Height : null,
+          width: x.Layout ? x.Layout.Width : null
+        }));
 
       return { initialLayout: layout, currentLayout: layout };
 
     case SET_LAYOUT:
-      return { ...state, currentLayout: action.ids };
+      return { ...state, currentLayout: action.layout };
 
     case RESET_LAYOUT:
       return { ...state, currentLayout: state.initialLayout };

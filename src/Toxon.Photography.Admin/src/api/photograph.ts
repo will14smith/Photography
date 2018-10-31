@@ -1,4 +1,5 @@
 import { fetchWithAuthentication } from "./fetch";
+import { LayoutModel } from "./layout";
 
 export enum ImageType {
   Full = "Full",
@@ -11,7 +12,7 @@ export interface Image {
 export interface Photograph {
   Id: string;
   Title: string;
-  LayoutPosition?: number;
+  Layout?: LayoutModel;
 
   Images: Image[];
 
@@ -36,10 +37,10 @@ function toAppModel(apiModel: any): Photograph {
   return {
     ...apiModel,
 
-    LayoutPosition:
-      apiModel.LayoutPosition === null || apiModel.LayoutPosition === undefined
+    Layout:
+      apiModel.Layout === null || apiModel.Layout === undefined
         ? undefined
-        : apiModel.LayoutPosition,
+        : apiModel.Layout,
 
     CaptureTime: new Date(apiModel.CaptureTime),
     UploadTime: new Date(apiModel.UploadTime)
