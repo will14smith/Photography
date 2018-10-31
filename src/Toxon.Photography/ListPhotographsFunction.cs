@@ -30,7 +30,7 @@ namespace Toxon.Photography
             var search = photographTable.Scan(new ScanFilter());
 
             var documents = await search.GetAllAsync();
-            var models = documents.Select(PhotographSerialization.FromDocument);
+            var models = documents.Select(PhotographSerialization.FromDocument).OrderByDescending(x => x.UploadTime);
 
             return BuildResponseFromModels(models);
         }
