@@ -17,6 +17,8 @@ namespace Toxon.Photography
 {
     public class SiteGeneratorFunction
     {
+        private static readonly TimeSpan ExpirationPeriod = TimeSpan.FromDays(2);
+
         private readonly IAmazonDynamoDB _dynamoDb;
         private readonly IAmazonS3 _s3;
 
@@ -32,12 +34,14 @@ namespace Toxon.Photography
 
         public async Task Handle()
         {
-            var provider = new DynamoDBImageProvider(_dynamoDb, _s3, BucketNames.Images);
+            var expirationTime = DateTime.UtcNow.Add(ExpirationPeriod);
+
+            var provider = new DynamoDBImageProvider(_dynamoDb, _s3, BucketNames.Images, expirationTime);
             var generator = new SiteGenerator(provider);
 
             var site = await generator.GenerateAsync();
 
-            var storer = new S3SiteStorer(_s3, BucketNames.Site);
+            var storer = new S3SiteStorer(_s3, BucketNames.Site, expirationTime);
             await storer.StoreAsync(site);
         }
     }
@@ -46,13 +50,15 @@ namespace Toxon.Photography
     {
         private readonly IAmazonS3 _s3;
         private readonly string _bucket;
+        private readonly DateTime _expirationTime;
 
         private readonly Table _photographs;
 
-        public DynamoDBImageProvider(IAmazonDynamoDB dynamoDb, IAmazonS3 s3, string bucket)
+        public DynamoDBImageProvider(IAmazonDynamoDB dynamoDb, IAmazonS3 s3, string bucket, DateTime expirationTime)
         {
             _s3 = s3;
             _bucket = bucket;
+            _expirationTime = expirationTime;
 
             _photographs = Table.LoadTable(dynamoDb, TableNames.Photograph);
         }
@@ -60,13 +66,13 @@ namespace Toxon.Photography
         public async Task<IEnumerable<PhotographViewModel>> GetPrimaryPhotographsAsync()
         {
             var filter = new ScanFilter();
-            filter.AddCondition(PhotographSerialization.Fields.LayoutPosition, ScanOperator.IsNotNull);
+            filter.AddCondition(PhotographSerialization.Fields.Layout, ScanOperator.IsNotNull);
             var search = _photographs.Scan(filter);
 
             var documents = await search.GetAllAsync();
             return documents
                 .Select(PhotographSerialization.FromDocument)
-                .OrderBy(x => x.LayoutPosition)
+                .OrderBy(x => x.Layout)
                 .Select(ToViewModel);
         }
 
@@ -82,7 +88,7 @@ namespace Toxon.Photography
                     BucketName = _bucket,
                     Key = thumbnail.ObjectKey,
 
-                    Expires = DateTime.UtcNow.AddDays(2),
+                    Expires = _expirationTime,
                 });
             }
 
@@ -94,11 +100,13 @@ namespace Toxon.Photography
     {
         private readonly IAmazonS3 _s3;
         private readonly string _bucket;
+        private readonly DateTime _expirationTime;
 
-        public S3SiteStorer(IAmazonS3 s3, string bucket)
+        public S3SiteStorer(IAmazonS3 s3, string bucket, DateTime expirationTime)
         {
             _s3 = s3;
             _bucket = bucket;
+            _expirationTime = expirationTime;
         }
 
         public async Task StoreAsync(Site site)
@@ -118,14 +126,18 @@ namespace Toxon.Photography
             {
                 await ms.WriteAsync(content);
 
-                await _s3.PutObjectAsync(new PutObjectRequest
+                var request = new PutObjectRequest
                 {
                     BucketName = _bucket,
                     Key = file.Name,
                     ContentType = file.ContentType,
 
                     InputStream = ms
-                });
+                };
+
+                request.Metadata.Add("Expires", _expirationTime.ToString("R"));
+
+                await _s3.PutObjectAsync(request);
             }
         }
     }
