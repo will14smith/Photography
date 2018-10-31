@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using Toxon.Photography.Config;
 using Toxon.Photography.Data;
 using Toxon.Photography.Http;
+using Toxon.Photography.Models;
 
 namespace Toxon.Photography
 {
@@ -42,7 +43,7 @@ namespace Toxon.Photography
 
             foreach (var id in allIds)
             {
-                var layout = model.TryGetValue(id, out var l) ? l : (int?)null;
+                var layout = model.TryGetValue(id, out var l) ? l : null;
 
                 await SetLayoutForPhotograph(photographTable, id, layout);
             }
@@ -63,9 +64,9 @@ namespace Toxon.Photography
             return true;
         }
 
-        private static IReadOnlyDictionary<Guid, int> BuildModelFromRequest(string body)
+        private static IReadOnlyDictionary<Guid, LayoutModel> BuildModelFromRequest(string body)
         {
-            return JsonConvert.DeserializeObject<Dictionary<Guid, int>>(body);
+            return JsonConvert.DeserializeObject<Dictionary<Guid, LayoutModel>>(body);
         }
 
         private async Task<IReadOnlyCollection<Guid>> GetAllIds(Table table)
@@ -81,11 +82,19 @@ namespace Toxon.Photography
             return documents.Select(x => x[PhotographSerialization.Fields.Id].AsGuid()).ToList();
         }
 
-        private static async Task SetLayoutForPhotograph(Table table, Guid id, int? layout)
+        private static async Task SetLayoutForPhotograph(Table table, Guid id, LayoutModel model)
         {
+            var layout = new Layout
+            {
+                Order = model.Order,
+
+                Width = model.Width,
+                Height = model.Height,
+            };
+
             var document = new Document
             {
-                [PhotographSerialization.Fields.LayoutPosition] = layout,
+                [PhotographSerialization.Fields.Layout] = LayoutSerialization.ToDocument(layout),
             };
 
             await table.UpdateItemAsync(document, id, new UpdateItemOperationConfig { ReturnValues = ReturnValues.None });
