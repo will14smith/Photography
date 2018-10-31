@@ -94,7 +94,7 @@ namespace Toxon.Photography
 
             var document = new Document
             {
-                [PhotographSerialization.Fields.Layout] = layout != null ? (DynamoDBEntry) LayoutSerialization.ToDocument(layout) : new DynamoDBNull(),
+                [PhotographSerialization.Fields.Layout] = LayoutSerialization.ToDocument(layout),
             };
 
             await table.UpdateItemAsync(document, id, new UpdateItemOperationConfig { ReturnValues = ReturnValues.None });

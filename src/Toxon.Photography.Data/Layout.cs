@@ -50,6 +50,11 @@ namespace Toxon.Photography.Data
 
         public static Document ToDocument(Layout layout)
         {
+            if (layout == null)
+            {
+                return null;
+            }
+
             return new Document
             {
                 [Fields.Order] = layout.Order,
