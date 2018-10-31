@@ -84,17 +84,17 @@ namespace Toxon.Photography
 
         private static async Task SetLayoutForPhotograph(Table table, Guid id, LayoutModel model)
         {
-            var layout = new Layout
+            var layout = model != null ? new Layout
             {
                 Order = model.Order,
 
                 Width = model.Width,
                 Height = model.Height,
-            };
+            } : null;
 
             var document = new Document
             {
-                [PhotographSerialization.Fields.Layout] = LayoutSerialization.ToDocument(layout),
+                [PhotographSerialization.Fields.Layout] = layout != null ? (DynamoDBEntry) LayoutSerialization.ToDocument(layout) : new DynamoDBNull(),
             };
 
             await table.UpdateItemAsync(document, id, new UpdateItemOperationConfig { ReturnValues = ReturnValues.None });
