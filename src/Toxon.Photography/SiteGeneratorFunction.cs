@@ -130,12 +130,12 @@ namespace Toxon.Photography
                 {
                     BucketName = _bucket,
                     Key = file.Name,
+
                     ContentType = file.ContentType,
+                    Headers = { Expires = _expirationTime },
 
-                    InputStream = ms
+                    InputStream = ms,
                 };
-
-                request.Metadata.Add("Expires", _expirationTime.ToString("R"));
 
                 await _s3.PutObjectAsync(request);
             }
