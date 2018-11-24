@@ -79,6 +79,9 @@ thumbnail-processor:
 site-generator:
   handler: Toxon.Photography::Toxon.Photography.SiteGeneratorFunction::Handle
   timeout: 300
+  environment:
+    SSM_SiteGenerator_AccessKey: ${self:service}-${self:provider.stage}-SiteGeneratorSigningUser-AccessKey
+    SSM_SiteGenerator_SecretKey: ${self:service}-${self:provider.stage}-SiteGeneratorSigningUser-SecretKey
   events:
     - schedule:
         rate: rate(1 day)

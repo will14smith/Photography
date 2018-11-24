@@ -5,8 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Amazon.SimpleSystemsManagement;
+using Amazon.SimpleSystemsManagement.Model;
 using Toxon.Photography.Config;
 using Toxon.Photography.Data;
 using Toxon.Photography.Generation;
@@ -20,28 +23,52 @@ namespace Toxon.Photography
         private static readonly TimeSpan ExpirationPeriod = TimeSpan.FromDays(2);
 
         private readonly IAmazonDynamoDB _dynamoDb;
-        private readonly IAmazonS3 _s3;
+        private readonly IAmazonS3 _s3Site;
+        private readonly IAmazonS3 _s3Images;
 
         public SiteGeneratorFunction()
-            : this(new AmazonDynamoDBClient(), new AmazonS3Client())
+            : this(new AmazonDynamoDBClient(), new AmazonS3Client(), NewImagesClient().Result)
         {
         }
-        public SiteGeneratorFunction(IAmazonDynamoDB dynamoDb, IAmazonS3 s3)
+
+        private static async Task<IAmazonS3> NewImagesClient()
+        {
+            var accessKeySSMKeyName = Environment.GetEnvironmentVariable("SSM_SiteGenerator_AccessKey");
+            var secretKeySSMKeyName = Environment.GetEnvironmentVariable("SSM_SiteGenerator_SecretKey");
+
+            var ssm = new AmazonSimpleSystemsManagementClient();
+
+            var parameters = await ssm.GetParametersAsync(new GetParametersRequest
+            {
+                Names = new List<string> {accessKeySSMKeyName, secretKeySSMKeyName},
+                WithDecryption = true
+            });
+
+            var accessKeyParameter = parameters.Parameters.Single(x => x.Name == accessKeySSMKeyName);
+            var secretKeyParameter = parameters.Parameters.Single(x => x.Name == secretKeySSMKeyName);
+
+            var credentials = new BasicAWSCredentials(accessKeyParameter.Value, secretKeyParameter.Value);
+
+            return new AmazonS3Client(credentials);
+        }
+
+        public SiteGeneratorFunction(IAmazonDynamoDB dynamoDb, IAmazonS3 s3Site, IAmazonS3 s3Images)
         {
             _dynamoDb = dynamoDb;
-            _s3 = s3;
+            _s3Site = s3Site;
+            _s3Images = s3Images;
         }
 
         public async Task Handle()
         {
             var expirationTime = DateTime.UtcNow.Add(ExpirationPeriod);
 
-            var provider = new DynamoDBImageProvider(_dynamoDb, _s3, BucketNames.Images, expirationTime);
+            var provider = new DynamoDBImageProvider(_dynamoDb, _s3Images, BucketNames.Images, expirationTime);
             var generator = new SiteGenerator(provider);
 
             var site = await generator.GenerateAsync();
 
-            var storer = new S3SiteStorer(_s3, BucketNames.Site, expirationTime);
+            var storer = new S3SiteStorer(_s3Site, BucketNames.Site, expirationTime);
             await storer.StoreAsync(site);
         }
     }

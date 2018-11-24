@@ -36,3 +36,27 @@ Resources:
                           - ImageBucket
                           - Arn
                       - "*"
+
+  SiteGeneratorSigningUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: ${self:service}-${self:provider.stage}-SiteGeneratorSigningUser
+  SiteGeneratorSigningPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ${self:service}-${self:provider.stage}-SiteGeneratorSigningPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource:
+              Fn::Join:
+                - "/"
+                - - Fn::GetAtt:
+                      - ImageBucket
+                      - Arn
+                  - "*"
+      Users:
+        - Ref: SiteGeneratorSigningUser
