@@ -1,0 +1,32 @@
+thumbnail-ecs-trigger:
+  handler: Toxon.Photography::Toxon.Photography.ECSTriggerFunction::Handle
+  environment:
+    TASK_DEFINITION:
+      Ref: ThumbnailProcessorTask
+    CLUSTER_NAME:
+      Ref: ThumbnailProcessorCluster
+    CONTAINER_NAME: ${self:service}-${self:provider.stage}-thumbnailprocessor # TODO variable
+    TASK_SUBNETS:
+      Ref: ThumbnailProcessorSubnet
+    TASK_SECURITY_GROUPS:
+      Ref: ThumbnailProcessorSecurityGroup
+  events:
+    - sns:
+        arn:
+          Ref: ImageProcessorTopic
+        # ideally this would be `Fn::GetAtt: [ImageProcessorTopic, TopicName]`
+        # but there seems to be bug where topicName must be a string if arn is ref
+        topicName: ${self:custom.imageProcessorTopicName}
+
+thumbnail-ecs-handler:
+  handler: Toxon.Photography::Toxon.Photography.ECSHandlerFunction::Handle
+  events:
+    - cloudwatchEvent:
+        event:
+          source:
+            - aws.ecs
+          detail-type:
+            - ECS Task State Change
+          detail:
+            clusterArn:
+              Ref: ThumbnailProcessorCluster

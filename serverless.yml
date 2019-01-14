@@ -25,12 +25,14 @@ package:
 
 functions:
   - ${file(infrastructure/functions.yml)}
+  - ${file(infrastructure/functions-thumbnailprocessor.yml)}
 
 resources:
   - ${file(infrastructure/resources-api-gateway.yml)}
+  - ${file(infrastructure/resources-cloudfront.yml)}
   - ${file(infrastructure/resources-cognito.yml)}
   - ${file(infrastructure/resources-dynamodb.yml)}
   - ${file(infrastructure/resources-iam.yml)}
   - ${file(infrastructure/resources-s3.yml)}
   - ${file(infrastructure/resources-sns.yml)}
-  - ${file(infrastructure/resources-cloudfront.yml)}
+  - ${file(infrastructure/resources-thumbnailprocessor.yml)}

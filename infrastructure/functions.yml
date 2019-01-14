@@ -62,19 +62,6 @@ edit-layout:
           authorizerId:
             Ref: ApiGatewayAuthorizer
 
-# image processors
-thumbnail-processor:
-  handler: Toxon.Photography::Toxon.Photography.ThumbnailProcessorFunction::Handle
-  timeout: 300
-  memorySize: 3008
-  events:
-    - sns:
-        arn:
-          Ref: ImageProcessorTopic
-        # ideally this would be `Fn::GetAtt: [ImageProcessorTopic, TopicName]`
-        # but there seems to be bug where topicName must be a string if arn is ref
-        topicName: ${self:custom.imageProcessorTopicName}
-
 # site generator
 site-generator:
   handler: Toxon.Photography::Toxon.Photography.SiteGeneratorFunction::Handle
