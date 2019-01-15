@@ -8,15 +8,27 @@ Playing around with the [serverless](https://github.com/serverless/serverless) f
 
 ```
 npm install -g serverless
+yarn
 cd src
 dotnet restore
 ```
+
+Install terraform
 
 ## Deployment
 
 ```
 ./build.sh
+tf workspace select dev
+tf apply
 sls deploy
+```
+
+```
+./build.sh
+tf workspace select prod
+tf apply
+sls deploy --stage prod
 ```
 
 Manual steps:
