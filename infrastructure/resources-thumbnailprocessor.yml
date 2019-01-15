@@ -117,7 +117,7 @@ Resources:
                 Resource:
                   Fn::Join:
                     - "/"
-                    - - Fn::GetAtt: [ImageBucket, Arn]
+                    - - ${self:custom.imageBucketArn}
                       - "*"
               - Effect: Allow
                 Action:

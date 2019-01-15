@@ -32,9 +32,7 @@ Resources:
                 Resource:
                   Fn::Join:
                     - "/"
-                    - - Fn::GetAtt:
-                          - ImageBucket
-                          - Arn
+                    - - ${self:custom.imageBucketArn}
                       - "*"
 
   SiteGeneratorSigningUser:
@@ -54,9 +52,7 @@ Resources:
             Resource:
               Fn::Join:
                 - "/"
-                - - Fn::GetAtt:
-                      - ImageBucket
-                      - Arn
+                - - ${self:custom.imageBucketArn}
                   - "*"
       Users:
         - Ref: SiteGeneratorSigningUser

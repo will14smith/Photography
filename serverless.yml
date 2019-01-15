@@ -1,9 +1,16 @@
 service: photography
 
+plugins:
+  - serverless-terraform-outputs
+
 custom:
   imageProcessorTopicName: ${self:service}-${self:provider.stage}-imageprocessor
   staticSiteCertificateArn: ${file(./serverless.${self:provider.stage}.json):staticSiteCertificateArn}
   staticSiteHostNames: ${file(./serverless.${self:provider.stage}.json):staticSiteHostNames}
+  tfStage: ${self:provider.stage}
+
+  imageBucketArn: ${terraform:${self:custom.tfStage}:image-bucket-arn.value}
+  siteBucketArn: ${terraform:${self:custom.tfStage}:site-bucket-arn.value}
 
 provider:
   name: aws
@@ -33,6 +40,5 @@ resources:
   - ${file(infrastructure/resources-cognito.yml)}
   - ${file(infrastructure/resources-dynamodb.yml)}
   - ${file(infrastructure/resources-iam.yml)}
-  - ${file(infrastructure/resources-s3.yml)}
   - ${file(infrastructure/resources-sns.yml)}
   - ${file(infrastructure/resources-thumbnailprocessor.yml)}

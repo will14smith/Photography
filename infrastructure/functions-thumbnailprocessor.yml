@@ -29,4 +29,4 @@ thumbnail-ecs-handler:
             - ECS Task State Change
           detail:
             clusterArn:
-              Ref: ThumbnailProcessorCluster
+              - Ref: ThumbnailProcessorCluster
