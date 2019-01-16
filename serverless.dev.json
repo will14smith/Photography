@@ -1,4 +1,0 @@
-{
-  "staticSiteCertificateArn": "arn:aws:acm:us-east-1:682179218046:certificate/0a059434-104e-49d0-a7b8-5ca2fcb951ab",
-  "staticSiteHostNames": ["photography-dev.toxon.co.uk"]
-}

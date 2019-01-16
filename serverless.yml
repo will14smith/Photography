@@ -4,8 +4,6 @@ plugins:
   - serverless-terraform-outputs
 
 custom:
-  staticSiteCertificateArn: ${file(./serverless.${self:provider.stage}.json):staticSiteCertificateArn}
-  staticSiteHostNames: ${file(./serverless.${self:provider.stage}.json):staticSiteHostNames}
   tfStage: ${self:provider.stage}
 
   imageBucketArn: ${terraform:${self:custom.tfStage}:image-bucket-arn.value}
@@ -37,7 +35,6 @@ functions:
 
 resources:
   - ${file(infrastructure/resources-api-gateway.yml)}
-  - ${file(infrastructure/resources-cloudfront.yml)}
   - ${file(infrastructure/resources-cognito.yml)}
   - ${file(infrastructure/resources-iam.yml)}
   - ${file(infrastructure/resources-thumbnailprocessor.yml)}
