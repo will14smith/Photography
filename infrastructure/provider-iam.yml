@@ -50,11 +50,11 @@
           - Ref: "AWS::AccountId"
           - "parameter/${self:service}-${self:provider.stage}-SiteGeneratorSigningUser-SecretKey"
 # This is required by the ECS trigger
-- Effect: Allow
-  Action:
-    - ecs:RunTask
-    - iam:PassRole
-  Resource:
-    - Ref: ThumbnailProcessorTask
-    - Fn::GetAtt: [ThumbnailProcessorExecutionRole, Arn]
-    - Fn::GetAtt: [ThumbnailProcessorTaskRole, Arn]
+# - Effect: Allow
+#   Action:
+#     - ecs:RunTask
+#     - iam:PassRole
+#   Resource:
+#     - Ref: ThumbnailProcessorTask
+#     - Fn::GetAtt: [ThumbnailProcessorExecutionRole, Arn]
+#     - Fn::GetAtt: [ThumbnailProcessorTaskRole, Arn]

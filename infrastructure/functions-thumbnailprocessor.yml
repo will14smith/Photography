@@ -1,15 +1,11 @@
 thumbnail-ecs-trigger:
   handler: Toxon.Photography::Toxon.Photography.ECSTriggerFunction::Handle
   environment:
-    TASK_DEFINITION:
-      Ref: ThumbnailProcessorTask
-    CLUSTER_NAME:
-      Ref: ThumbnailProcessorCluster
+    TASK_DEFINITION: ${self:custom.thumbnailProcessorTaskArn}
+    CLUSTER_NAME: ${self:custom.thumbnailProcessorClusterArn}
     CONTAINER_NAME: ${self:service}-${self:provider.stage}-thumbnailprocessor # TODO variable
-    TASK_SUBNETS:
-      Ref: ThumbnailProcessorSubnet
-    TASK_SECURITY_GROUPS:
-      Ref: ThumbnailProcessorSecurityGroup
+    TASK_SUBNETS: ${self:custom.thumbnailSubnets}
+    TASK_SECURITY_GROUPS: ${self:custom.thumbnailSecurityGroups}
   events:
     - sns:
         arn: ${self:custom.imageProcessorTopicArn}
@@ -26,4 +22,4 @@ thumbnail-ecs-handler:
             - ECS Task State Change
           detail:
             clusterArn:
-              - Ref: ThumbnailProcessorCluster
+              - ${self:custom.thumbnailProcessorClusterArn}

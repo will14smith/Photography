@@ -12,6 +12,11 @@ custom:
   imageProcessorTopicArn: ${terraform:${self:custom.tfStage}:image-processor-topic-arn.value}
   imageProcessorTopicName: ${terraform:${self:custom.tfStage}:image-processor-topic-name.value}
 
+  thumbnailProcessorClusterArn: ${terraform:${self:custom.tfStage}:thumbnail-processor-cluster-arn.value}
+  thumbnailProcessorTaskArn: ${terraform:${self:custom.tfStage}:thumbnail-processor-task-arn.value}
+  thumbnailSubnets: ${terraform:${self:custom.tfStage}:subnet-id.value}
+  thumbnailSecurityGroups: ${terraform:${self:custom.tfStage}:security-group-id.value}
+
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
@@ -37,4 +42,3 @@ resources:
   - ${file(infrastructure/resources-api-gateway.yml)}
   - ${file(infrastructure/resources-cognito.yml)}
   - ${file(infrastructure/resources-iam.yml)}
-  - ${file(infrastructure/resources-thumbnailprocessor.yml)}

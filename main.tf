@@ -58,3 +58,15 @@ output "image-processor-topic-name" {
 output "state-site-domain-name" {
   value = "${module.app.state-site-domain-name}"
 }
+output "thumbnail-processor-cluster-arn" {
+  value = "${module.app.thumbnail-processor-cluster-arn}"
+}
+output "thumbnail-processor-task-arn" {
+  value = "${module.app.thumbnail-processor-task-arn}"
+}
+output "subnet-id" {
+  value = "${module.app.subnet-id}"
+}
+output "security-group-id" {
+  value = "${module.app.security-group-id}"
+}
