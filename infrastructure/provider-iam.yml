@@ -30,8 +30,7 @@
 - Effect: Allow
   Action:
     - sns:Publish
-  Resource:
-    Ref: ImageProcessorTopic
+  Resource: ${self:custom.imageProcessorTopicArn}
 # This is only actually required for the site-generator function
 - Effect: Allow
   Action:

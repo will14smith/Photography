@@ -12,10 +12,7 @@ thumbnail-ecs-trigger:
       Ref: ThumbnailProcessorSecurityGroup
   events:
     - sns:
-        arn:
-          Ref: ImageProcessorTopic
-        # ideally this would be `Fn::GetAtt: [ImageProcessorTopic, TopicName]`
-        # but there seems to be bug where topicName must be a string if arn is ref
+        arn: ${self:custom.imageProcessorTopicArn}
         topicName: ${self:custom.imageProcessorTopicName}
 
 thumbnail-ecs-handler:

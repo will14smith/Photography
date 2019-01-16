@@ -25,3 +25,9 @@ output "site-bucket-arn" {
 output "photograph-table-arn" {
   value = "${module.app.photograph-table-arn}"
 }
+output "image-processor-topic-arn" {
+  value = "${module.app.image-processor-topic-arn}"
+}
+output "image-processor-topic-name" {
+  value = "${module.app.image-processor-topic-name}"
+}

@@ -4,7 +4,6 @@ plugins:
   - serverless-terraform-outputs
 
 custom:
-  imageProcessorTopicName: ${self:service}-${self:provider.stage}-imageprocessor
   staticSiteCertificateArn: ${file(./serverless.${self:provider.stage}.json):staticSiteCertificateArn}
   staticSiteHostNames: ${file(./serverless.${self:provider.stage}.json):staticSiteHostNames}
   tfStage: ${self:provider.stage}
@@ -12,6 +11,8 @@ custom:
   imageBucketArn: ${terraform:${self:custom.tfStage}:image-bucket-arn.value}
   siteBucketArn: ${terraform:${self:custom.tfStage}:site-bucket-arn.value}
   photographTableArn: ${terraform:${self:custom.tfStage}:photograph-table-arn.value}
+  imageProcessorTopicArn: ${terraform:${self:custom.tfStage}:image-processor-topic-arn.value}
+  imageProcessorTopicName: ${terraform:${self:custom.tfStage}:image-processor-topic-name.value}
 
 provider:
   name: aws
@@ -22,8 +23,7 @@ provider:
   environment:
     PHOTOGRAPH_TABLE: ${self:service}-${self:provider.stage}-photograph
     IMAGE_BUCKET: ${self:service}-${self:provider.stage}-image
-    IMAGE_PROCESSOR_TOPIC_ARN:
-      Ref: ImageProcessorTopic
+    IMAGE_PROCESSOR_TOPIC_ARN: ${self:custom.imageProcessorTopicArn}
     SITE_BUCKET: ${self:service}-${self:provider.stage}-site
 
   iamRoleStatements: ${file(infrastructure/provider-iam.yml)}
@@ -40,5 +40,4 @@ resources:
   - ${file(infrastructure/resources-cloudfront.yml)}
   - ${file(infrastructure/resources-cognito.yml)}
   - ${file(infrastructure/resources-iam.yml)}
-  - ${file(infrastructure/resources-sns.yml)}
   - ${file(infrastructure/resources-thumbnailprocessor.yml)}
