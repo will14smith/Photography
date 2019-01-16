@@ -11,6 +11,7 @@ custom:
 
   imageBucketArn: ${terraform:${self:custom.tfStage}:image-bucket-arn.value}
   siteBucketArn: ${terraform:${self:custom.tfStage}:site-bucket-arn.value}
+  photographTableArn: ${terraform:${self:custom.tfStage}:photograph-table-arn.value}
 
 provider:
   name: aws
@@ -38,7 +39,6 @@ resources:
   - ${file(infrastructure/resources-api-gateway.yml)}
   - ${file(infrastructure/resources-cloudfront.yml)}
   - ${file(infrastructure/resources-cognito.yml)}
-  - ${file(infrastructure/resources-dynamodb.yml)}
   - ${file(infrastructure/resources-iam.yml)}
   - ${file(infrastructure/resources-sns.yml)}
   - ${file(infrastructure/resources-thumbnailprocessor.yml)}

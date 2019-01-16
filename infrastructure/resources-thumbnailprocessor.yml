@@ -122,8 +122,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - dynamodb:UpdateItem
-                Resource:
-                  Fn::GetAtt: [PhotographTable, Arn]
+                Resource: ${self:custom.photographTableArn}
 
   # VPC
   ThumbnailProcessorVpc:

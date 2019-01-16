@@ -22,3 +22,6 @@ output "image-bucket-arn" {
 output "site-bucket-arn" {
   value = "${module.app.site-bucket-arn}"
 }
+output "photograph-table-arn" {
+  value = "${module.app.photograph-table-arn}"
+}

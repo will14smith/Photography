@@ -7,8 +7,7 @@
     - dynamodb:PutItem
     - dynamodb:UpdateItem
     - dynamodb:DeleteItem
-  Resource:
-    Fn::GetAtt: [PhotographTable, Arn]
+  Resource: ${self:custom.photographTableArn}
 - Effect: Allow
   Action:
     - s3:GetObject
