@@ -77,3 +77,15 @@ output "site-generator-accesskey-parameter" {
 output "site-generator-secretkey-parameter" {
   value = "${module.app.site-generator-secretkey-parameter}"
 }
+output "cognito-user-pool-id" { 
+  value = "${module.app.cognito-user-pool-id}"
+}
+output "cognito-user-pool-arn" { 
+  value = "${module.app.cognito-user-pool-arn}"
+}
+output "cognito-user-pool-web-client-id" { 
+  value = "${module.app.cognito-user-pool-web-client-id}"
+}
+output "cognito-identity-pool-id" { 
+  value = "${module.app.cognito-identity-pool-id}"
+}
