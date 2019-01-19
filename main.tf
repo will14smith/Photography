@@ -89,3 +89,6 @@ output "cognito-user-pool-web-client-id" {
 output "cognito-identity-pool-id" { 
   value = "${module.app.cognito-identity-pool-id}"
 }
+output "lambda-role-arn" {
+  value = "${module.app.lambda-role-arn}"
+}

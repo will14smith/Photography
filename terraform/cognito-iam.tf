@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "cognito-user-policy" {
   }
 }
 resource "aws_iam_role" "cognito-user" {
-  name_prefix = "${var.stage}-cognito-user"
+  name_prefix = "photography-${var.stage}-cognito-user"
   assume_role_policy = "${data.aws_iam_policy_document.cognito-user-assume.json}"
 }
 resource "aws_iam_role_policy" "cognito-user-policy" {

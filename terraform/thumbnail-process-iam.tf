@@ -26,7 +26,7 @@ data "aws_iam_policy_document" "thumbnail-execution-policy" {
   }
 }
 resource "aws_iam_role" "thumbnail-execution" {
-  name_prefix = "${var.stage}-thumbnail-execution"
+  name_prefix = "photography-${var.stage}-thumbnail-exec"
   assume_role_policy = "${data.aws_iam_policy_document.thumbnail-execution-role.json}"
 }
 resource "aws_iam_role_policy" "thumbnail-execution-policy" {
@@ -55,7 +55,7 @@ data "aws_iam_policy_document" "thumbnail-task-policy" {
   }
 }
 resource "aws_iam_role" "thumbnail-task" {
-  name_prefix = "${var.stage}-thumbnail-task"
+  name_prefix = "photography-${var.stage}-thumbnail-task"
   assume_role_policy = "${data.aws_iam_policy_document.thumbnail-task-role.json}"
 }
 resource "aws_iam_role_policy" "thumbnail-task-policy" {
