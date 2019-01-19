@@ -70,3 +70,10 @@ output "subnet-id" {
 output "security-group-id" {
   value = "${module.app.security-group-id}"
 }
+
+output "site-generator-accesskey-parameter" {
+  value = "${module.app.site-generator-accesskey-parameter}"
+}
+output "site-generator-secretkey-parameter" {
+  value = "${module.app.site-generator-secretkey-parameter}"
+}

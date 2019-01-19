@@ -17,6 +17,9 @@ custom:
   thumbnailSubnets: ${terraform:${self:custom.tfStage}:subnet-id.value}
   thumbnailSecurityGroups: ${terraform:${self:custom.tfStage}:security-group-id.value}
 
+  siteGeneratorAccessKeyParameter: ${terraform:${self:custom.tfStage}:site-generator-accesskey-parameter.value}
+  siteGeneratorSecretKeyParameter: ${terraform:${self:custom.tfStage}:site-generator-secretkey-parameter.value}
+
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
