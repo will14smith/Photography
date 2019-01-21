@@ -1,0 +1,74 @@
+digraph  test {
+  bgcolor=transparent
+
+  # File storage
+  node [style=filled color="#eee8aa" shape=rect];
+  SiteBucket [label="S3: Static Website"]
+  ImageBucket [label="S3: Images"]
+
+  # Public frontend
+  node [style=filled color="#00bfff"];
+  Public [label="Public"];
+  CloudFront [label="CloudFront"];
+  Certificate [label="ACM"]
+
+  Public -> CloudFront [label="HTTP(s)"]
+  Public -> ImageBucket [label="Pre-signed URL"]
+  CloudFront -> SiteBucket [label="Origin"]
+  CloudFront -> Certificate
+
+  # Admin frontend
+  node [style=filled color="#3cb371"];
+  Admin [label="Admin"]
+  AdminCDN [label="Netlify: Admin SPA"]
+  Amplify [label="TypeScript: AWS Amplify"]
+  Cognito [label="Auth: Cognito"]
+  ApiGateway [label="Api Gateway"]
+
+  Admin -> AdminCDN  [label="HTTP(s)"]
+  AdminCDN -> Amplify
+  Amplify -> Cognito
+  Amplify -> ApiGateway
+  Amplify -> ImageBucket
+
+  # Data storage
+  node [style=filled color="#cd5c5c"];
+  PhotographTable [label="DynamoDB: Photograph"]
+  JobTable [label="DynamoDB: Job"]
+
+  # Api lambdas
+  node [style=filled color="#ff8c00"];
+  LambdaDbOnly [label="Lambda: List / Get / Delete"]
+  LambdaUpload [label = "Lambda: Create / Edit"]
+
+  ApiGateway -> LambdaDbOnly
+  ApiGateway -> LambdaUpload
+  LambdaDbOnly -> PhotographTable
+  LambdaUpload -> PhotographTable
+  LambdaUpload -> ProcessorQueue
+
+  # Site generator
+  node [style=filled color="#ff69b4"];
+  SiteGeneratorLambda [label="Lambda: Site generator"]
+  SiteGeneratorTrigger [label="CloudWatch Event: Daily cron"]
+
+  SiteGeneratorTrigger -> SiteGeneratorLambda
+  SiteGeneratorLambda -> SiteBucket
+  SiteGeneratorLambda -> CloudFront [label="Invalidate"]
+  SiteGeneratorLambda -> PhotographTable
+  
+  # Thumbnails
+  node [style=filled color="#9370db"];
+  ProcessorQueue [label="SNS: Images" color="#9370db"]
+  ProcessorTrigger [label="Lambda: ECS trigger"]
+  ProcessorTask [label="ECS: Image processor(s)"]
+  ProcessorMonitor [label="Lambda: ECS monitor"]
+
+  ProcessorQueue -> ProcessorTrigger
+  ProcessorTrigger -> JobTable
+  ProcessorTrigger -> ProcessorTask
+  ProcessorTask -> ProcessorMonitor
+  ProcessorTask -> PhotographTable
+  ProcessorTask -> ImageBucket
+  ProcessorMonitor -> JobTable
+}
