@@ -15,6 +15,7 @@ using Toxon.Photography.Data;
 using Toxon.Photography.Generation;
 using Toxon.Photography.Generation.Models;
 using File = Toxon.Photography.Generation.Models.File;
+using Filter = Amazon.S3.Model.Filter;
 
 namespace Toxon.Photography
 {
@@ -92,10 +93,12 @@ namespace Toxon.Photography
 
         public async Task<IEnumerable<PhotographViewModel>> GetPrimaryPhotographsAsync()
         {
-            var filter = new ScanFilter();
-            filter.AddCondition(PhotographSerialization.Fields.Layout, ScanOperator.IsNotNull);
-            var search = _photographs.Scan(filter);
-
+            var expr = new Expression {ExpressionStatement = "attribute_exists(#layout) AND NOT attribute_type(#layout, :null)"};
+            expr.ExpressionAttributeNames.Add("#layout", "layout");
+            expr.ExpressionAttributeValues.Add(":null", new Primitive("NULL"));
+           
+            var search = _photographs.Scan(expr);
+            
             var documents = await search.GetAllAsync();
             return documents
                 .Select(PhotographSerialization.FromDocument)
