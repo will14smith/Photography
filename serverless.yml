@@ -22,11 +22,18 @@ custom:
   siteGeneratorAccessKeyParameter: ${terraform:${self:custom.tfStage}:site-generator-accesskey-parameter.value}
   siteGeneratorSecretKeyParameter: ${terraform:${self:custom.tfStage}:site-generator-secretkey-parameter.value}
 
+  apiGatewayRestApiId: ${terraform:${self:custom.tfStage}:api-gateway-rest-api-id.value}
+  apiGatewayRestApiRootResourceId: ${terraform:${self:custom.tfStage}:api-gateway-rest-api-root-resource-id.value}
+
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
   region: eu-west-2
   runtime: dotnetcore2.1
+
+  apiGateway:
+    restApiId: ${self:custom.apiGatewayRestApiId}
+    restApiRootResourceId: ${self:custom.apiGatewayRestApiRootResourceId}
 
   environment:
     PHOTOGRAPH_TABLE: ${self:service}-${self:provider.stage}-photograph

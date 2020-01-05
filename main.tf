@@ -27,12 +27,12 @@ locals {
     }
   }
 
-  workspace = "${merge(local.env["defaults"], local.env[terraform.workspace])}"
+  workspace = merge(local.env["defaults"], local.env[terraform.workspace])
 }
 
 # application
 module "app" {
-  source = "terraform"
+  source = "./terraform"
 
   stage = "${terraform.workspace}"  
   static-site-acm-certificate-arn = "${local.workspace["static-site-acm-certificate-arn"]}"
@@ -91,4 +91,10 @@ output "cognito-identity-pool-id" {
 }
 output "lambda-role-arn" {
   value = "${module.app.lambda-role-arn}"
+}
+output "api-gateway-rest-api-id" { 
+  value = module.app.api-gateway-rest-api-id
+}
+output "api-gateway-rest-api-root-resource-id" {
+  value = module.app.api-gateway-rest-api-root-resource-id
 }

@@ -25,7 +25,7 @@ resource "aws_cognito_identity_pool" "web-auth" {
 }
 resource "aws_cognito_identity_pool_roles_attachment" "web-auth" {
   identity_pool_id = "${aws_cognito_identity_pool.web-auth.id}"
-  roles {
+  roles = {
     authenticated = "${aws_iam_role.cognito-user.arn}"
   }
 }

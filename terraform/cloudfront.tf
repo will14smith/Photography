@@ -1,9 +1,9 @@
 # variables
 variable "static-site-acm-certificate-arn" {
-  type = "string"
+  type = string
 }
 variable "static-site-aliases" {
-  type = "list"
+  type = list(string)
 }
 
 # resources

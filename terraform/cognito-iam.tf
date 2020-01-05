@@ -27,6 +27,24 @@ data "aws_iam_policy_document" "cognito-user-policy" {
     ]
     resources = ["${aws_s3_bucket.image-bucket.arn}/*"]
   }
+
+  statement {
+    actions = [
+      "apigateway:DELETE",
+      "apigateway:PUT",
+      "apigateway:PATCH",
+      "apigateway:POST",
+      "apigateway:GET"
+    ]
+    resources = ["${aws_api_gateway_rest_api.api.arn}/*"]
+  }
+
+  statement {
+    actions = [
+      "execute-api:Invoke"
+    ]
+    resources = ["${aws_api_gateway_rest_api.api.execution_arn}/*"]
+  }
 }
 resource "aws_iam_role" "cognito-user" {
   name_prefix = "photography-${var.stage}-cognito-user"
@@ -36,4 +54,3 @@ resource "aws_iam_role_policy" "cognito-user-policy" {
   role = "${aws_iam_role.cognito-user.id}"
   policy = "${data.aws_iam_policy_document.cognito-user-policy.json}"
 }
-
