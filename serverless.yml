@@ -22,8 +22,6 @@ custom:
   siteGeneratorAccessKeyParameter: ${terraform:${self:custom.tfStage}:site-generator-accesskey-parameter.value}
   siteGeneratorSecretKeyParameter: ${terraform:${self:custom.tfStage}:site-generator-secretkey-parameter.value}
 
-  cognitoUserPoolArn: ${terraform:${self:custom.tfStage}:cognito-user-pool-arn.value}
-
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
@@ -44,17 +42,3 @@ package:
 functions:
   - ${file(serverless/functions.yml)}
   - ${file(serverless/functions-thumbnailprocessor.yml)}
-
-resources:
-  Resources:
-    ApiGatewayAuthorizer:
-      Type: AWS::ApiGateway::Authorizer
-      Properties:
-        AuthorizerResultTtlInSeconds: 300
-        IdentitySource: method.request.header.Authorization
-        Name: Cognito
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        Type: COGNITO_USER_POOLS
-        ProviderARNs:
-          - ${self:custom.cognitoUserPoolArn}
