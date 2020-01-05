@@ -31,19 +31,6 @@ tf apply
 sls deploy --stage prod
 ```
 
-## Running admin client
-
-Local:
-
-Ensure `src/Toxon.Photography.Admin/.env` is present and up to date.
-
-```
-cd src/Toxon.Photography.Admin
-yarn start
-```
-
-Production: Just push to master, it is deployed automatically by Netlify
-
 ## Architecture
 
 ![Architecture diagram](docs/arch.png)
