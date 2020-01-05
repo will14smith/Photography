@@ -3,7 +3,7 @@ thumbnail-ecs-trigger:
   environment:
     TASK_DEFINITION: ${self:custom.thumbnailProcessorTaskArn}
     CLUSTER_NAME: ${self:custom.thumbnailProcessorClusterArn}
-    CONTAINER_NAME: ${self:service}-${self:provider.stage}-thumbnailprocessor # TODO variable
+    CONTAINER_NAME: thumbnailprocessor
     TASK_SUBNETS: ${self:custom.thumbnailSubnets}
     TASK_SECURITY_GROUPS: ${self:custom.thumbnailSecurityGroups}
   events:
