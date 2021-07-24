@@ -22,28 +22,29 @@ resource "aws_s3_bucket" "site-bucket" {
   }
 }
 resource "aws_s3_bucket_policy" "site-bucket" {
-  bucket = "${aws_s3_bucket.site-bucket.id}"
-
-  policy = <<EOF
-{
-    "Version": "2008-10-17",
-    "Statement": [
-        {
-            "Sid": "PublicReadGetObject",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": "${aws_s3_bucket.site-bucket.arn}/*"
-        }
-    ]
+  bucket = aws_s3_bucket.site-bucket.id
+  policy = data.aws_iam_policy_document.site-bucket-public.json
 }
-EOF
+
+data "aws_iam_policy_document" "site-bucket-public" {
+  version = "2008-10-17"
+  
+  statement {
+    sid = "PublicReadGetObject"
+    effect = "Allow"
+    principals {
+      identifiers = ["*"]
+      type = "*"
+    }
+    actions = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.site-bucket.arn}/*"]
+  }
 }
 
 # outputs
 output "image-bucket-arn" {
-  value = "${aws_s3_bucket.image-bucket.arn}"
+  value = aws_s3_bucket.image-bucket.arn
 }
 output "site-bucket-arn" {
-  value = "${aws_s3_bucket.site-bucket.arn}"
+  value = aws_s3_bucket.site-bucket.arn
 }

@@ -9,7 +9,7 @@ resource "aws_cognito_user_pool" "web-auth" {
 }
 resource "aws_cognito_user_pool_client" "web-auth" { 
   name = "photography-${var.stage}"
-  user_pool_id = "${aws_cognito_user_pool.web-auth.id}"
+  user_pool_id = aws_cognito_user_pool.web-auth.id
 
   generate_secret = false
 }
@@ -19,26 +19,26 @@ resource "aws_cognito_identity_pool" "web-auth" {
   allow_unauthenticated_identities = false
 
   cognito_identity_providers {
-    client_id = "${aws_cognito_user_pool_client.web-auth.id}"
-    provider_name = "${aws_cognito_user_pool.web-auth.endpoint}"
+    client_id = aws_cognito_user_pool_client.web-auth.id
+    provider_name = aws_cognito_user_pool.web-auth.endpoint
   }
 }
 resource "aws_cognito_identity_pool_roles_attachment" "web-auth" {
-  identity_pool_id = "${aws_cognito_identity_pool.web-auth.id}"
+  identity_pool_id = aws_cognito_identity_pool.web-auth.id
   roles = {
-    authenticated = "${aws_iam_role.cognito-user.arn}"
+    authenticated = aws_iam_role.cognito-user.arn
   }
 }
 
 output "cognito-user-pool-id" { 
-  value = "${aws_cognito_user_pool.web-auth.id}"
+  value = aws_cognito_user_pool.web-auth.id
 }
 output "cognito-user-pool-arn" { 
-  value = "${aws_cognito_user_pool.web-auth.arn}"
+  value = aws_cognito_user_pool.web-auth.arn
 }
 output "cognito-user-pool-web-client-id" { 
-  value = "${aws_cognito_user_pool_client.web-auth.id}"
+  value = aws_cognito_user_pool_client.web-auth.id
 }
 output "cognito-identity-pool-id" { 
-  value = "${aws_cognito_identity_pool.web-auth.id}"
+  value = aws_cognito_identity_pool.web-auth.id
 }

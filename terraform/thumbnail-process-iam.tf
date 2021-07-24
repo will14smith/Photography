@@ -27,11 +27,11 @@ data "aws_iam_policy_document" "thumbnail-execution-policy" {
 }
 resource "aws_iam_role" "thumbnail-execution" {
   name_prefix = "photography-${var.stage}-thumbnail-exec"
-  assume_role_policy = "${data.aws_iam_policy_document.thumbnail-execution-role.json}"
+  assume_role_policy = data.aws_iam_policy_document.thumbnail-execution-role.json
 }
 resource "aws_iam_role_policy" "thumbnail-execution-policy" {
-  role = "${aws_iam_role.thumbnail-execution.id}"
-  policy = "${data.aws_iam_policy_document.thumbnail-execution-policy.json}"
+  role = aws_iam_role.thumbnail-execution.id
+  policy = data.aws_iam_policy_document.thumbnail-execution-policy.json
 }
 
 # task role
@@ -51,14 +51,14 @@ data "aws_iam_policy_document" "thumbnail-task-policy" {
   }
   statement {
     actions = ["dynamodb:UpdateItem"]
-    resources = ["${aws_dynamodb_table.photograph.arn}"]
+    resources = [aws_dynamodb_table.photograph.arn]
   }
 }
 resource "aws_iam_role" "thumbnail-task" {
   name_prefix = "photography-${var.stage}-thumbnail-task"
-  assume_role_policy = "${data.aws_iam_policy_document.thumbnail-task-role.json}"
+  assume_role_policy = data.aws_iam_policy_document.thumbnail-task-role.json
 }
 resource "aws_iam_role_policy" "thumbnail-task-policy" {
-  role = "${aws_iam_role.thumbnail-execution.id}"
-  policy = "${data.aws_iam_policy_document.thumbnail-task-policy.json}"
+  role = aws_iam_role.thumbnail-execution.id
+  policy = data.aws_iam_policy_document.thumbnail-task-policy.json
 }

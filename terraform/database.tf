@@ -13,5 +13,5 @@ resource "aws_dynamodb_table" "photograph" {
 
 # outputs
 output "photograph-table-arn" {
-  value = "${aws_dynamodb_table.photograph.arn}"
+  value = aws_dynamodb_table.photograph.arn
 }

@@ -4,8 +4,8 @@ resource "aws_sns_topic" "image-processor" {
 
 # outputs
 output "image-processor-topic-arn" {
-  value = "${aws_sns_topic.image-processor.arn}"
+  value = aws_sns_topic.image-processor.arn
 }
 output "image-processor-topic-name" {
-  value = "${aws_sns_topic.image-processor.name}"
+  value = aws_sns_topic.image-processor.name
 }

@@ -10,28 +10,28 @@ data "aws_iam_policy_document" "site-generator-signing-policy" {
 }
 
 resource "aws_iam_user_policy" "site-generator-signing" {
-  user = "${aws_iam_user.site-generator-signing.name}"
-  policy = "${data.aws_iam_policy_document.site-generator-signing-policy.json}"
+  user = aws_iam_user.site-generator-signing.name
+  policy = data.aws_iam_policy_document.site-generator-signing-policy.json
 }
 
 resource "aws_iam_access_key" "site-generator-signing" {
-  user    = "${aws_iam_user.site-generator-signing.name}"
+  user    = aws_iam_user.site-generator-signing.name
 }
 
 resource "aws_ssm_parameter" "site-generator-signing-accesskey" {
   name = "photography-${var.stage}-SiteGeneratorSigningUser-AccessKey"
   type = "SecureString"
-  value = "${aws_iam_access_key.site-generator-signing.id}"
+  value = aws_iam_access_key.site-generator-signing.id
 }
 resource "aws_ssm_parameter" "site-generator-signing-secretkey" {
   name = "photography-${var.stage}-SiteGeneratorSigningUser-SecretKey"
   type = "SecureString"
-  value = "${aws_iam_access_key.site-generator-signing.secret}"
+  value = aws_iam_access_key.site-generator-signing.secret
 }
 
 output "site-generator-accesskey-parameter" {
-  value = "${aws_ssm_parameter.site-generator-signing-accesskey.name}"
+  value = aws_ssm_parameter.site-generator-signing-accesskey.name
 }
 output "site-generator-secretkey-parameter" {
-  value = "${aws_ssm_parameter.site-generator-signing-secretkey.name}"
+  value = aws_ssm_parameter.site-generator-signing-secretkey.name
 }

@@ -8,7 +8,7 @@ data "aws_iam_policy_document" "cognito-user-assume" {
     condition {
       test = "StringEquals"
       variable = "cognito-identity.amazonaws.com:aud"
-      values = ["${aws_cognito_identity_pool.web-auth.id}"]
+      values = [aws_cognito_identity_pool.web-auth.id]
     }
     condition {
       test = "ForAnyValue:StringLike"
@@ -48,9 +48,9 @@ data "aws_iam_policy_document" "cognito-user-policy" {
 }
 resource "aws_iam_role" "cognito-user" {
   name_prefix = "photography-${var.stage}-cognito-user"
-  assume_role_policy = "${data.aws_iam_policy_document.cognito-user-assume.json}"
+  assume_role_policy = data.aws_iam_policy_document.cognito-user-assume.json
 }
 resource "aws_iam_role_policy" "cognito-user-policy" {
-  role = "${aws_iam_role.cognito-user.id}"
-  policy = "${data.aws_iam_policy_document.cognito-user-policy.json}"
+  role = aws_iam_role.cognito-user.id
+  policy = data.aws_iam_policy_document.cognito-user-policy.json
 }
