@@ -1,29 +1,26 @@
 service: photography
 
-plugins:
-  - serverless-terraform-outputs
-
 custom:
-  tfStage: ${self:provider.stage}
+  tfStage:
 
-  lambdaRoleArn: ${terraform:${self:custom.tfStage}:lambda-role-arn.value}
+  lambdaRoleArn: ${ssm:/photography/${self:provider.stage}/lambda-role-arn}
 
-  imageBucketArn: ${terraform:${self:custom.tfStage}:image-bucket-arn.value}
-  siteBucketArn: ${terraform:${self:custom.tfStage}:site-bucket-arn.value}
-  photographTableArn: ${terraform:${self:custom.tfStage}:photograph-table-arn.value}
-  imageProcessorTopicArn: ${terraform:${self:custom.tfStage}:image-processor-topic-arn.value}
-  imageProcessorTopicName: ${terraform:${self:custom.tfStage}:image-processor-topic-name.value}
+  imageBucketArn: ${ssm:/photography/${self:provider.stage}/image-bucket-arn}
+  siteBucketArn: ${ssm:/photography/${self:provider.stage}/site-bucket-arn}
+  photographTableArn: ${ssm:/photography/${self:provider.stage}/photograph-table-arn}
+  imageProcessorTopicArn: ${ssm:/photography/${self:provider.stage}/image-processor-topic-arn}
+  imageProcessorTopicName: ${ssm:/photography/${self:provider.stage}/image-processor-topic-name}
 
-  thumbnailProcessorClusterArn: ${terraform:${self:custom.tfStage}:thumbnail-processor-cluster-arn.value}
-  thumbnailProcessorTaskArn: ${terraform:${self:custom.tfStage}:thumbnail-processor-task-arn.value}
-  thumbnailSubnets: ${terraform:${self:custom.tfStage}:subnet-id.value}
-  thumbnailSecurityGroups: ${terraform:${self:custom.tfStage}:security-group-id.value}
+  thumbnailProcessorClusterArn: ${ssm:/photography/${self:provider.stage}/thumbnail-processor-cluster-arn}
+  thumbnailProcessorTaskArn: ${ssm:/photography/${self:provider.stage}/thumbnail-processor-task-arn}
+  thumbnailSubnets: ${ssm:/photography/${self:provider.stage}/subnet-id}
+  thumbnailSecurityGroups: ${ssm:/photography/${self:provider.stage}/security-group-id}
 
-  siteGeneratorAccessKeyParameter: ${terraform:${self:custom.tfStage}:site-generator-accesskey-parameter.value}
-  siteGeneratorSecretKeyParameter: ${terraform:${self:custom.tfStage}:site-generator-secretkey-parameter.value}
+  siteGeneratorAccessKeyParameter: ${ssm:/photography/${self:provider.stage}/site-generator-accesskey-parameter}
+  siteGeneratorSecretKeyParameter: ${ssm:/photography/${self:provider.stage}/site-generator-secretkey-parameter}
 
-  apiGatewayRestApiId: ${terraform:${self:custom.tfStage}:api-gateway-rest-api-id.value}
-  apiGatewayRestApiRootResourceId: ${terraform:${self:custom.tfStage}:api-gateway-rest-api-root-resource-id.value}
+  apiGatewayRestApiId: ${ssm:/photography/${self:provider.stage}/api-gateway-rest-api-id}
+  apiGatewayRestApiRootResourceId: ${ssm:/photography/${self:provider.stage}/api-gateway-rest-api-root-resource-id}
 
 provider:
   name: aws
@@ -41,7 +38,8 @@ provider:
     IMAGE_PROCESSOR_TOPIC_ARN: ${self:custom.imageProcessorTopicArn}
     SITE_BUCKET: ${self:service}-${self:provider.stage}-site
 
-  role: ${self:custom.lambdaRoleArn}
+  iam:
+    role: ${self:custom.lambdaRoleArn}
 
 package:
   artifact: deploy/deploy-package.zip

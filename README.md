@@ -8,7 +8,6 @@ Playing around with the [serverless](https://github.com/serverless/serverless) f
 
 ```
 npm install -g serverless
-yarn
 cd src
 dotnet restore
 ```

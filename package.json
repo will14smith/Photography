@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "serverless-terraform-outputs": "^0.0.2"
-  }
-}
