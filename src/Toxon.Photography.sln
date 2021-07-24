@@ -11,6 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toxon.Photography.Data", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Photography.ThumbnailProcessor", "Toxon.Photography.ThumbnailProcessor\Toxon.Photography.ThumbnailProcessor.csproj", "{92788E04-08F1-4912-862F-BDBAEDA1C080}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{163CBD7B-FCC4-4B7C-B147-61F3216D65C6}"
+ProjectSection(SolutionItems) = preProject
+	..\main.tf = ..\main.tf
+	..\build.sh = ..\build.sh
+	..\serverless.yml = ..\serverless.yml
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

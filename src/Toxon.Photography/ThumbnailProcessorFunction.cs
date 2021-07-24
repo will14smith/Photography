@@ -79,7 +79,7 @@ namespace Toxon.Photography
                 image.SaveAsJpeg(output, new JpegEncoder { Quality = _thumbnailSettings.Quality });
             }
 
-            return (output, ImageFormats.Jpeg);
+            return (output, JpegFormat.Instance);
         }
         
         private async Task<string> UploadImageToS3(Stream thumbnail, IImageFormat format)

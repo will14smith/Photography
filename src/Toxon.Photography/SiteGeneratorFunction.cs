@@ -162,7 +162,7 @@ namespace Toxon.Photography
                     Key = file.Name,
 
                     ContentType = file.ContentType,
-                    Headers = { Expires = _expirationTime },
+                    Headers = { ExpiresUtc = _expirationTime },
 
                     InputStream = ms,
                 };
