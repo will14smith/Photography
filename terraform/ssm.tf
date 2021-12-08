@@ -25,7 +25,7 @@ locals {
 resource "aws_ssm_parameter" "parameters" {
   for_each = local.parameters
 
-  name  = "/photography/${terraform.workspace}/${each.key}"
+  name  = "/photography/${var.stage}/${each.key}"
   type  = "String"
   value = each.value
 }
