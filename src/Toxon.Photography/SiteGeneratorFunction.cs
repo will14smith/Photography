@@ -110,7 +110,7 @@ namespace Toxon.Photography
         {
             string thumbnailUrl = null;
 
-            var thumbnail = photograph.Images.FirstOrDefault(x => x.Type == ImageType.Thumbnail);
+            var thumbnail = photograph.Images.LastOrDefault(x => x.Type == ImageType.Thumbnail);
             if (thumbnail != null)
             {
                 thumbnailUrl = _s3.GetPreSignedURL(new GetPreSignedUrlRequest

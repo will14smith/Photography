@@ -25,7 +25,7 @@ namespace Toxon.Photography
         private readonly IAmazonDynamoDB _dynamoDb;
         private readonly IAmazonS3 _s3;
 
-        private readonly ThumbnailSettings _thumbnailSettings = new ThumbnailSettings(width: null, height: 250, quality: 90);
+        private readonly ThumbnailSettings _thumbnailSettings = new ThumbnailSettings(width: 850, height: null, quality: 90);
 
         public ThumbnailProcessorFunction()
             : this(new AmazonDynamoDBClient(), new AmazonS3Client())
