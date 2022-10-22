@@ -10,7 +10,7 @@ fi
 cd src/Toxon.Photography
 
 dotnet restore
-dotnet lambda package --configuration release --framework netcoreapp3.1 --output-package ../../deploy/deploy-package.zip
+dotnet lambda package --configuration release --framework net6.0 --output-package ../../deploy/deploy-package.zip
 
 cd ../Toxon.Photography.ThumbnailProcessor
 

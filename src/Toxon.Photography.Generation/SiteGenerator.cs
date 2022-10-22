@@ -20,7 +20,7 @@ namespace Toxon.Photography.Generation
             _imageProvider = imageProvider;
 
             _razor = new RazorLightEngineBuilder()
-                .UseFilesystemProject(Path.Combine(Environment.CurrentDirectory, "Views"))
+                .UseFileSystemProject(Path.Combine(Environment.CurrentDirectory, "Views"))
                 .UseMemoryCachingProvider()
                 .Build();
 

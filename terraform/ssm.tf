@@ -28,4 +28,6 @@ resource "aws_ssm_parameter" "parameters" {
   name  = "/photography/${var.stage}/${each.key}"
   type  = "String"
   value = each.value
+  
+  overwrite = true
 }

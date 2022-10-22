@@ -22,11 +22,13 @@ resource "aws_ssm_parameter" "site-generator-signing-accesskey" {
   name = "photography-${var.stage}-SiteGeneratorSigningUser-AccessKey"
   type = "SecureString"
   value = aws_iam_access_key.site-generator-signing.id
+  overwrite = true
 }
 resource "aws_ssm_parameter" "site-generator-signing-secretkey" {
   name = "photography-${var.stage}-SiteGeneratorSigningUser-SecretKey"
   type = "SecureString"
   value = aws_iam_access_key.site-generator-signing.secret
+  overwrite = true
 }
 
 output "site-generator-accesskey-parameter" {

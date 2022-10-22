@@ -1,8 +1,14 @@
 resource "aws_s3_bucket" "image-bucket" {
   bucket = "photography-${var.stage}-image"
+}
 
+resource "aws_s3_bucket_acl" "image-bucket" {
+  bucket = aws_s3_bucket.image-bucket.id
   acl = "private"
+}
 
+resource "aws_s3_bucket_cors_configuration" "image-bucket" {
+  bucket = aws_s3_bucket.image-bucket.id
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["GET", "PUT", "POST", "DELETE"]
@@ -14,13 +20,21 @@ resource "aws_s3_bucket" "image-bucket" {
 
 resource "aws_s3_bucket" "site-bucket" {
   bucket = "photography-${var.stage}-site"
+}
 
+resource "aws_s3_bucket_acl" "site-bucket" {
+  bucket = aws_s3_bucket.site-bucket.id
   acl = "public-read"
+}
 
-  website {
-    index_document = "index.html"
+resource "aws_s3_bucket_website_configuration" "site-bucket" {
+  bucket = aws_s3_bucket.site-bucket.id
+
+  index_document {
+    suffix = "index.html"
   }
 }
+
 resource "aws_s3_bucket_policy" "site-bucket" {
   bucket = aws_s3_bucket.site-bucket.id
   policy = data.aws_iam_policy_document.site-bucket-public.json
