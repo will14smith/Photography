@@ -14,7 +14,7 @@ namespace Toxon.Photography.ThumbnailProcessor
             SNSEvent input;
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(rawInput)))
             {
-                var serializer = new Amazon.Lambda.Serialization.Json.JsonSerializer();
+                var serializer = new Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer();
                 input = serializer.Deserialize<SNSEvent>(stream);
             }
 

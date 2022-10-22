@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:runtime
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
 WORKDIR /app
 COPY ./out ./

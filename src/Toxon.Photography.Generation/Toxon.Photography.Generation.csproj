@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,18 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="RazorLight" Version="2.0.0-beta1" />
-    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="RazorLight" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Toxon.Photography.Data\Toxon.Photography.Data.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="AWSSDK.S3">
-      <HintPath>..\..\..\..\Users\will\.nuget\packages\awssdk.s3\3.3.21.1\lib\netstandard1.3\AWSSDK.S3.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
+  
 </Project>

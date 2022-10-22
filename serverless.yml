@@ -26,7 +26,7 @@ provider:
   name: aws
   stage: ${opt:stage, 'dev'}
   region: eu-west-2
-  runtime: dotnetcore3.1
+  runtime: dotnet6
 
   apiGateway:
     restApiId: ${self:custom.apiGatewayRestApiId}
