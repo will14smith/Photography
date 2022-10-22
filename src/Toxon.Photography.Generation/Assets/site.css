@@ -10,10 +10,24 @@
         color: #000000 !important;
     }
 
-.box-shadow {
-    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+
+    margin-top: -3rem;
+    margin-left: calc(var(--bs-gutter-x) * -0.5);
+    margin-right: calc(var(--bs-gutter-x) * -0.5);
+    padding: 0;
 }
 
-.gallery-img {
-    width: 100%;
-}
+    .gallery li {
+        flex-grow: 1;
+    }
+    
+    .gallery img {
+        height: 20rem;
+        min-width: 100%;
+        object-fit: cover;
+        vertical-align: bottom;
+    }
