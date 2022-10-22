@@ -59,6 +59,6 @@ resource "aws_iam_role" "thumbnail-task" {
   assume_role_policy = data.aws_iam_policy_document.thumbnail-task-role.json
 }
 resource "aws_iam_role_policy" "thumbnail-task-policy" {
-  role = aws_iam_role.thumbnail-execution.id
+  role = aws_iam_role.thumbnail-task.id
   policy = data.aws_iam_policy_document.thumbnail-task-policy.json
 }
