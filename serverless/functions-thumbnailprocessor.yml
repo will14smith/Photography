@@ -10,16 +10,3 @@ thumbnail-ecs-trigger:
     - sns:
         arn: ${self:custom.imageProcessorTopicArn}
         topicName: ${self:custom.imageProcessorTopicName}
-
-thumbnail-ecs-handler:
-  handler: Toxon.Photography::Toxon.Photography.ECSHandlerFunction::Handle
-  events:
-    - cloudwatchEvent:
-        event:
-          source:
-            - aws.ecs
-          detail-type:
-            - ECS Task State Change
-          detail:
-            clusterArn:
-              - ${self:custom.thumbnailProcessorClusterArn}
