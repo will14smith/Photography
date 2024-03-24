@@ -1,0 +1,54 @@
+﻿@page "/index.html"
+@using Toxon.Photography.Generation.Models
+
+<LayoutView Layout="typeof(Layout)">
+    @if (!Photographs.Any())
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="text-muted">No images, check back later!</h3>
+            </div>
+        </div>
+    }
+    else
+    {
+        <ul class="gallery">
+            @foreach (var vm in Photographs)
+            {
+                var photograph = vm.Photograph;
+
+                <li>
+                    <img src="@(vm.ThumbnailUrl ?? "http://via.placeholder.com/350x233?text=Processing...")" alt="@photograph.Title" title="@photograph.Title" loading="lazy" onClick="openModal(this)">
+                </li>
+            }
+        </ul>
+        
+        <div class="modal fade" id="image-modal">
+            <div class="modal-dialog">
+                <div class="modal-body">
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            const modalElem = document.querySelector("#image-modal");
+            const modalImgElem = document.createElement("img");
+            modalImgElem.style.maxWidth = "100%";
+            modalElem.querySelector(".modal-body").append(modalImgElem);
+            
+            function openModal(sender) {            
+                modalImgElem.src = sender.src;
+                modalImgElem.alt = sender.alt;
+                modalImgElem.title = sender.title;
+                
+                const modal = bootstrap.Modal.getOrCreateInstance(modalElem);
+                modal.show();
+            }
+        </script>
+    }
+</LayoutView>
+
+@code {
+    [Parameter, EditorRequired]
+    public IEnumerable<PhotographViewModel> Photographs { get; set; }
+}

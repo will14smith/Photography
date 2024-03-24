@@ -2,13 +2,13 @@
     padding: 2rem 0;
 }
 
-    footer a.text-muted {
-        font-size: 1.5rem;
-    }
+footer a.text-muted {
+    font-size: 1.5rem;
+}
 
-    footer a:hover.text-muted {
-        color: #000000 !important;
-    }
+footer a:hover.text-muted {
+    color: #000000 !important;
+}
 
 .gallery {
     display: flex;
@@ -21,13 +21,13 @@
     padding: 0;
 }
 
-    .gallery li {
-        flex-grow: 1;
-    }
+.gallery li {
+    flex-grow: 1;
+}
     
-    .gallery img {
-        height: 20rem;
-        min-width: 100%;
-        object-fit: cover;
-        vertical-align: bottom;
-    }
+.gallery img {
+    height: 20rem;
+    min-width: 100%;
+    object-fit: cover;
+    vertical-align: bottom;
+}

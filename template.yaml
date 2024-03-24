@@ -1,0 +1,330 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  HttpApi:
+    CorsConfiguration:
+      AllowMethods: 
+        - "*"
+      AllowHeaders: 
+        - Content-Type
+        - X-Amz-Date
+        - Authorization
+        - X-Api-Key
+        - X-Amz-Security-Token
+      AllowOrigins: 
+        - "*"
+    Auth:
+      EnableIamAuthorizer: true
+  Function:
+    Timeout: 100
+    Environment:
+      Variables:
+        PHOTOGRAPH_TABLE: !Ref PhotographyTable
+        IMAGE_BUCKET: !Ref ImageBucket
+        SITE_BUCKET: !Ref SiteBucket
+
+Parameters: 
+  SiteAcmCertificateArn:
+    Type: String
+  SiteAliases:
+    Type: CommaDelimitedList
+
+Resources:
+  ApiFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: ./src/Toxon.Photography/
+      Handler: Toxon.Photography
+      Runtime: dotnet8
+      MemorySize: 1024
+      Environment: 
+        Variables:
+          SITE_GENERATOR_LAMBDA: !Ref SiteGeneratorFunction
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PhotographyTable
+        - S3CrudPolicy:
+            BucketName: !Ref ImageBucket
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SiteGeneratorFunction
+      Events:
+        ProxyResource:
+          Type: HttpApi
+          Properties:
+            PayloadFormatVersion: "2.0"
+            Path: /{proxy+}
+            Method: ANY
+            Auth:
+              Authorizer: AWS_IAM
+        CorsProxyResource:
+          Type: HttpApi
+          Properties:
+            PayloadFormatVersion: "2.0"
+            Path: /{proxy+}
+            Method: OPTIONS
+
+  SiteGeneratorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/Toxon.Photography.Generation
+      Handler: Toxon.Photography.Generation::Toxon.Photography.Generation.SiteGeneratorLambda::FunctionHandlerAsync
+      Runtime: dotnet8
+      MemorySize: 1024
+      Environment:
+        Variables:
+          SITE_GENERATOR_ACCESS_KEY_SSM_PATH: !GetAtt [SSMParameterSetter, AccessKeyPath]
+          SITE_GENERATOR_SECRET_KEY_SSM_PATH: !GetAtt [SSMParameterSetter, SecretKeyPath]
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref PhotographyTable
+        - S3ReadPolicy:
+            BucketName: !Ref ImageBucket
+        - S3CrudPolicy:
+            BucketName: !Ref SiteBucket
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+                - ssm:GetParameters
+              Resource:
+                - !Join ["", ["arn:aws:ssm:*:*:parameter", !GetAtt [SSMParameterSetter, AccessKeyPath]]]
+                - !Join ["", ["arn:aws:ssm:*:*:parameter", !GetAtt [SSMParameterSetter, SecretKeyPath]]]
+      Events:
+        ScheduleEvent:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: "rate(1 day)"
+
+  SiteCloudfront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        IPV6Enabled: true
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_100
+        HttpVersion: http2and3
+        Aliases: !Ref SiteAliases
+        DefaultCacheBehavior:
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          TargetOriginId: s3
+          ViewerProtocolPolicy: redirect-to-https
+
+        Origins:
+          - Id: s3
+            DomainName: !Sub ${SiteBucket}.s3-website.${AWS::Region}.amazonaws.com
+            CustomOriginConfig:
+              OriginProtocolPolicy: http-only
+              
+        ViewerCertificate: 
+          AcmCertificateArn: !Ref SiteAcmCertificateArn
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+
+  PhotographyTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Join ["-", ["photography", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+        
+  ImageBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Join ["-", ["photography-images", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Join ["-", ["photography-site", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref SiteBucket
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+          - Action: "s3:GetObject"
+            Effect: Allow
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref SiteBucket, "/*"]]
+            Principal: "*"
+            
+  # cognito for the admin panel
+  AdminUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Join ["-", ["photography-admin", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      AliasAttributes: [email]
+      AutoVerifiedAttributes: [email]
+  AdminUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Join [ "-", [ "photography-admin", !Select [ "0", !Split [ "-", !Select [ "2", !Split [ "/", !Ref AWS::StackId ] ] ] ] ] ]
+      UserPoolId: !Ref AdminUserPool
+      GenerateSecret: false
+  AdminIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: !Join [ "-", [ "photography-admin", !Select [ "0", !Split [ "-", !Select [ "2", !Split [ "/", !Ref AWS::StackId ] ] ] ] ] ]
+      AllowUnauthenticatedIdentities: false
+      CognitoIdentityProviders:
+        - ClientId: !Ref AdminUserPoolClient
+          ProviderName: !GetAtt [AdminUserPool, ProviderName]
+  AdminIdentityPoolRoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties: 
+      IdentityPoolId: !Ref AdminIdentityPool
+      Roles:
+        authenticated: !GetAtt [AdminRole, Arn]
+  AdminRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join [ "-", [ "photography-admin-cognito", !Select [ "0", !Split [ "-", !Select [ "2", !Split [ "/", !Ref AWS::StackId ] ] ] ] ] ]
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                - cognito-identity.amazonaws.com
+            Condition:
+              StringEquals:
+                "cognito-identity.amazonaws.com:aud": !Ref AdminIdentityPool
+              "ForAnyValue:StringLike":
+                "cognito-identity.amazonaws.com:amr": authenticated
+            Action:
+              - "sts:AssumeRoleWithWebIdentity"
+      Policies: 
+        - PolicyName: AdminPanelAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:AbortMultipartUpload
+                  - s3:ListMultipartUploadParts
+                Resource:
+                  - !Sub "${ImageBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - execute-api:Invoke
+                Resource: 
+                  - !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ServerlessHttpApi}/*"
+  
+  # we need a real IAM user to pre-sign S3 URLs for reasons...
+  S3SigningUser:
+    Type: AWS::IAM::User
+    Properties: 
+      UserName: !Join ["-", ["photography-signing", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+  S3SigningUserPolicy:
+    Type: AWS::IAM::UserPolicy
+    Properties: 
+      UserName: !Ref S3SigningUser
+      PolicyName: AccessImageBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: "s3:GetObject"
+            Effect: Allow
+            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ImageBucket, "/*" ] ]
+  S3SigningUserCredentials:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref S3SigningUser
+      Serial: 0
+  SSMParameterSetter:
+    Type: Custom::SSMParameterSetter
+    Properties:
+      ServiceToken: !GetAtt SSMParameterSetterLambda.Arn
+      Prefix: !Join ["/", ["/photography", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]], "SigningUser"]]
+      AccessKey: !Ref S3SigningUserCredentials
+      SecretKey: !GetAtt [S3SigningUserCredentials, SecretAccessKey]
+  SSMParameterSetterLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.12
+      Handler: index.handler
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ssm:PutParameter
+                - ssm:DeleteParameter
+              Resource: "arn:aws:ssm:*:*:parameter/*"
+      InlineCode: |
+        import cfnresponse
+        import boto3
+        from botocore.exceptions import ClientError
+        
+        ssm = boto3.client("ssm")
+      
+        def handler(event, context):
+          try:
+            prefix = event["ResourceProperties"]["Prefix"]
+
+            if event["RequestType"] == "Create" or event["RequestType"] == "Update":
+              access_key = event["ResourceProperties"]["AccessKey"]
+              secret_key = event["ResourceProperties"]["SecretKey"]
+              
+              ssm.put_parameter(Name=f"{prefix}AccessKey", Value=access_key, Type="SecureString", Overwrite=True)
+              ssm.put_parameter(Name=f"{prefix}SecretKey", Value=secret_key, Type="SecureString", Overwrite=True)
+            
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, {"AccessKeyPath": f"{prefix}AccessKey", "SecretKeyPath": f"{prefix}SecretKey"}, prefix)
+            elif event["RequestType"] == "Delete":              
+              ssm.delete_parameter(Name=f"{prefix}AccessKey")
+              ssm.delete_parameter(Name=f"{prefix}SecretKey")
+              
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, prefix)
+            else:
+              cfnresponse.send(event, context, cfnresponse.FAILED)
+          
+          except ClientError as error:
+            print(error)
+            cfnresponse.send(event, context, cfnresponse.FAILED, {"code": error.response["Error"]["Code"]}, prefix)
+          except error:
+            print(error)
+            cfnresponse.send(event, context, cfnresponse.FAILED, {"error" : error}, prefix)
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
+  ImageBucket:
+    Description: "Image bucket name"
+    Value: !Ref ImageBucket
+  SiteBucketEndpoint:
+    Description: "Generated site bucket website URL"
+    Value: !GetAtt [SiteBucket, WebsiteURL]
+  SiteEndpoint:
+    Description: "Generated site cloudfront URL"
+    Value: !Join ["", ["https://", !GetAtt [SiteCloudfront, DomainName]]]
+  AdminUserPoolId:
+    Description: "Id of the user pool for authenticating with the admin panel"
+    Value: !Ref AdminUserPool
+  AdminUserPoolClientId:
+    Description: "Id of the user pool client for authenticating with the admin panel"
+    Value: !Ref AdminUserPoolClient
+  AdminIdentityPoolId:
+    Description: "Id of the identity pool for authenticating with the admin panel"
+    Value: !Ref AdminIdentityPool

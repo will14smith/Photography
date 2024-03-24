@@ -1,26 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Assets\**\*" />
-    <None Remove="Views\*.cshtml" />
-    <Content Include="Assets\**\*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\*.cshtml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Amazon.Lambda.Core" Version="2.2.0" />
+        <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.302.1" />
+        <PackageReference Include="AWSSDK.S3" Version="3.7.307.1" />
+        <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.7.303.9" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.3" />
+      <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="RazorLight" Version="2.3.1" />
-  </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Toxon.Photography.Data\Toxon.Photography.Data.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Toxon.Photography.Data\Toxon.Photography.Data.csproj" />
-  </ItemGroup>
-  
+    <ItemGroup>
+        <None Remove="Assets\**\*" />
+        <Content Include="Assets\**\*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    
 </Project>

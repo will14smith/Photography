@@ -1,0 +1,46 @@
+# More information about the configuration file can be found here:
+# https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html
+version = 0.1
+
+[default]
+[default.global.parameters]
+stack_name = "toxon-photography-dev"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.validate.parameters]
+lint = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_NAMED_IAM"
+confirm_changeset = true
+resolve_s3 = true
+region = "eu-west-2"
+parameter_overrides = [
+    "SiteAcmCertificateArn=arn:aws:acm:us-east-1:682179218046:certificate/0a059434-104e-49d0-a7b8-5ca2fcb951ab",
+    "SiteAliases=photography-dev.toxon.co.uk"
+]
+
+[default.package.parameters]
+resolve_s3 = true
+
+[default.sync.parameters]
+watch = true
+
+[default.local_start_api.parameters]
+warm_containers = "EAGER"
+
+[default.local_start_lambda.parameters]
+warm_containers = "EAGER"
+
+[prod]
+[prod.global.parameters]
+stack_name = "toxon-photography-prod"
+
+[prod.deploy.parameters]
+parameter_overrides = [
+    "SiteAcmCertificateArn=arn:aws:acm:us-east-1:682179218046:certificate/6cc4623e-c061-41b8-85b3-ed0c4a67b39d",
+    "SiteAliases=www.toxon.co.uk,toxon.co.uk"
+]

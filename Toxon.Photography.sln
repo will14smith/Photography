@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DEAF7F92-411E-4FE7-823B-C4F5DB41BBF8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Photography", "src\Toxon.Photography\Toxon.Photography.csproj", "{FC5B185F-DEBF-46D8-B864-9EF757827789}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Photography.Data", "src\Toxon.Photography.Data\Toxon.Photography.Data.csproj", "{40EB18FA-B4FD-4AB9-8DE0-B7191A31B30F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Photography.Generation", "src\Toxon.Photography.Generation\Toxon.Photography.Generation.csproj", "{3A0963BC-05F4-4A3E-8DC0-5E79369C3A98}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC5B185F-DEBF-46D8-B864-9EF757827789}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC5B185F-DEBF-46D8-B864-9EF757827789}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC5B185F-DEBF-46D8-B864-9EF757827789}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC5B185F-DEBF-46D8-B864-9EF757827789}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40EB18FA-B4FD-4AB9-8DE0-B7191A31B30F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40EB18FA-B4FD-4AB9-8DE0-B7191A31B30F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40EB18FA-B4FD-4AB9-8DE0-B7191A31B30F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40EB18FA-B4FD-4AB9-8DE0-B7191A31B30F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A0963BC-05F4-4A3E-8DC0-5E79369C3A98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A0963BC-05F4-4A3E-8DC0-5E79369C3A98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A0963BC-05F4-4A3E-8DC0-5E79369C3A98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A0963BC-05F4-4A3E-8DC0-5E79369C3A98}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FC5B185F-DEBF-46D8-B864-9EF757827789} = {DEAF7F92-411E-4FE7-823B-C4F5DB41BBF8}
+		{40EB18FA-B4FD-4AB9-8DE0-B7191A31B30F} = {DEAF7F92-411E-4FE7-823B-C4F5DB41BBF8}
+		{3A0963BC-05F4-4A3E-8DC0-5E79369C3A98} = {DEAF7F92-411E-4FE7-823B-C4F5DB41BBF8}
+	EndGlobalSection
+EndGlobal

@@ -2,35 +2,21 @@
 
 A serverless personal photography website.
 
-Playing around with the [serverless](https://github.com/serverless/serverless) framework for hosting my photography website at very minimal cost.
-
-## Installation
-
-```
-npm install -g serverless
-cd src
-dotnet restore
-```
-
-Install terraform
+Playing around with the [AWS SAM](https://aws.amazon.com/serverless/sam/) tool for hosting my photography website at very minimal cost.
 
 ## Deployment
 
 ```
-./build.sh
-tf workspace select dev
-tf apply
-sls deploy
+sam build
+sam validate
+sam deploy 
 ```
 
-```
-./build.sh
-tf workspace select prod
-tf apply
-sls deploy --stage prod
-```
+TODO production deploys
 
 ## Architecture
+
+TODO update for new architecture
 
 ![Architecture diagram](docs/arch.png)
 

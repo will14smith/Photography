@@ -1,16 +1,9 @@
 ﻿using Toxon.Photography.Data;
 
-namespace Toxon.Photography.Generation.Models
-{
-    public class PhotographViewModel
-    {
-        public PhotographViewModel(Photograph photograph, string thumbnailUrl)
-        {
-            Photograph = photograph;
-            ThumbnailUrl = thumbnailUrl;
-        }
+namespace Toxon.Photography.Generation.Models;
 
-        public Photograph Photograph { get; }
-        public string ThumbnailUrl { get; }
-    }
+public class PhotographViewModel(Photograph photograph, string? thumbnailUrl)
+{
+    public Photograph Photograph { get; } = photograph;
+    public string? ThumbnailUrl { get; } = thumbnailUrl;
 }

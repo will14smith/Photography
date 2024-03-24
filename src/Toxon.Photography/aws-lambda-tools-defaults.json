@@ -1,0 +1,6 @@
+{
+  "profile": "default",
+  "region": "eu-west-2",
+  "configuration": "Release",
+  "s3-prefix": "Toxon.Photography/"
+}
