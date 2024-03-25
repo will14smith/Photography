@@ -1,6 +1,8 @@
-﻿using Amazon.DynamoDBv2;
+﻿using System.Text.Json;
+using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.EventBridge;
+using Amazon.EventBridge.Model;
 using Microsoft.AspNetCore.Mvc;
 using Toxon.Photography.Data;
 using Toxon.Photography.Data.Config;
@@ -48,7 +50,7 @@ public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge e
 
         await _photographTable.PutItemAsync(PhotographSerialization.ToDocument(photograph));
         
-        await PhotographEvent.SendAsync(eventBridge, "create", photograph);
+        await SendEventAsync("create", photograph);
         
         return Created($"{photograph.Id}", photograph);
     }
@@ -63,8 +65,25 @@ public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge e
         var document = await _photographTable.UpdateItemAsync(updateDocument, id, new UpdateItemOperationConfig { ReturnValues = ReturnValues.AllNewAttributes });
         var photograph = PhotographSerialization.FromDocument(document);
         
-        await PhotographEvent.SendAsync(eventBridge, "update", photograph);
+        await SendEventAsync("update", photograph);
 
         return Accepted(photograph);
+    }
+
+    public async Task SendEventAsync(string action, Photograph photograph)
+    {
+        var eventDetail = new PhotographEvent { Photograph = photograph };
+        
+        await eventBridge.PutEventsAsync(new PutEventsRequest
+        {
+            Entries = [
+                new PutEventsRequestEntry
+                {
+                    Detail = JsonSerializer.Serialize(eventDetail),
+                    DetailType = $"photograph.{action}",
+                    Source = "photography",
+                }
+            ]
+        });
     }
 }

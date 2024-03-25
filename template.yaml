@@ -48,6 +48,8 @@ Resources:
             BucketName: !Ref ImageBucket
         - LambdaInvokePolicy:
             FunctionName: !Ref SiteGeneratorFunction
+        - EventBridgePutEventsPolicy:
+            EventBusName: "*"
       Events:
         ProxyResource:
           Type: HttpApi
@@ -97,6 +99,29 @@ Resources:
           Properties:
             ScheduleExpression: "rate(1 day)"
 
+  ThumbnailProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/Toxon.Photography.ThumbnailProcessing
+      Handler: Toxon.Photography.ThumbnailProcessing::Toxon.Photography.ThumbnailProcessing.ThumbnailProcessorLambda::FunctionHandlerAsync
+      Runtime: dotnet8
+      MemorySize: 10240
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PhotographyTable
+        - S3CrudPolicy:
+            BucketName: !Ref ImageBucket
+        - EventBridgePutEventsPolicy:
+            EventBusName: "*"
+      Events:
+        EventBridgeEvent:
+          Type: EventBridgeRule
+          Properties:
+            Pattern: 
+              "detail-type": 
+                - photograph.create
+
+
   SiteCloudfront:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -140,6 +165,21 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Join ["-", ["photography-images", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+      CorsConfiguration: 
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - DELETE
+            AllowedOrigins:
+              - '*'
+            ExposedHeaders:
+              - ETag
+              - Date
+            MaxAge: 3600
   SiteBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain

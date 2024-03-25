@@ -6,7 +6,7 @@ using Toxon.Photography.Data.Config;
 namespace Toxon.Photography.Controllers;
 
 [ApiController]
-[Route("site-generator")]
+[Route("generate")]
 public class SiteGeneratorController(IAmazonLambda lambda) : ControllerBase
 {
     [HttpPost]
