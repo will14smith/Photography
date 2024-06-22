@@ -98,6 +98,7 @@ Resources:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: "rate(1 day)"
+            OmitName: true
 
   ThumbnailProcessorFunction:
     Type: AWS::Serverless::Function
@@ -142,7 +143,7 @@ Resources:
             DomainName: !Sub ${SiteBucket}.s3-website.${AWS::Region}.amazonaws.com
             CustomOriginConfig:
               OriginProtocolPolicy: http-only
-              
+
         ViewerCertificate: 
           AcmCertificateArn: !Ref SiteAcmCertificateArn
           MinimumProtocolVersion: TLSv1.2_2021

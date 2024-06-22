@@ -12,7 +12,11 @@ sam validate
 sam deploy 
 ```
 
-TODO production deploys
+once confirmed in dev, promote to production using:
+
+```
+sam deploy --config-env prod 
+```
 
 ## Architecture
 
