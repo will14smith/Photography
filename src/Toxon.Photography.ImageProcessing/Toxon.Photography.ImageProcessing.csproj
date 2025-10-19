@@ -4,9 +4,11 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="AWSSDK.BedrockRuntime" Version="4.0.7.5" />
       <PackageReference Include="AWSSDK.S3" Version="4.0.7.12" />
       <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
     </ItemGroup>

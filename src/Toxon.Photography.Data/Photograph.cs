@@ -19,7 +19,7 @@ public class Photograph
     public DateTime? CaptureTime { get; init; }
     public DateTime UploadTime { get; init; }
     
-    public IReadOnlyDictionary<string, string> Metadata { get; init; } = [];
+    public IReadOnlyDictionary<string, string> Metadata { get; init; } = new Dictionary<string, string>();
 }
 
 public static class PhotographSerialization

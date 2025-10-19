@@ -1,4 +1,5 @@
-﻿using Amazon.S3;
+﻿using System.Globalization;
+using Amazon.S3;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using Toxon.Photography.Data.Config;
 
@@ -35,7 +36,7 @@ public class MetadataProcessor(IAmazonS3 s3)
     {
         if (exif.TryGetValue(ExifTag.DateTimeOriginal, out var dateTimeOriginal) && dateTimeOriginal.Value is not null)
         {
-            if(DateTime.TryParse(dateTimeOriginal.Value, out var parsedDateTimeOriginal))
+            if (DateTime.TryParseExact(dateTimeOriginal.Value, "yyyy:MM:dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDateTimeOriginal))
             {
                 metadata.CaptureTime = parsedDateTimeOriginal;
             }
@@ -43,17 +44,21 @@ public class MetadataProcessor(IAmazonS3 s3)
             
         if (exif.TryGetValue(ExifTag.ExposureTime, out var exposureTime))
         {
-            metadata.Exposure = $"{exposureTime.Value} sec";
+            var value = exposureTime.Value.Numerator / (decimal)exposureTime.Value.Denominator;
+            
+            metadata.Exposure = $"{(value < 0 ? exposureTime.Value.ToString() : value.ToString("0.0"))} sec";
         }
             
         if (exif.TryGetValue(ExifTag.FNumber, out var fNumber))
         {
-            metadata.Aperture = $"f{fNumber.Value}";
+            var value = fNumber.Value.Numerator / (decimal)fNumber.Value.Denominator;
+            metadata.Aperture = $"f/{value:0.0}";
         }
             
         if (exif.TryGetValue(ExifTag.FocalLength, out var focalLength))
         {
-            metadata.FocalLength = $"{focalLength.Value}mm";
+            var value = focalLength.Value.Numerator / (decimal)focalLength.Value.Denominator;
+            metadata.FocalLength = $"{value:0}mm";
         }
             
         if (exif.TryGetValue(ExifTag.ISOSpeed, out var isoSpeed))

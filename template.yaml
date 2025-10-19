@@ -50,6 +50,14 @@ Resources:
             FunctionName: !Ref SiteGeneratorFunction
         - EventBridgePutEventsPolicy:
             EventBusName: "*"
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:InvokeModelWithResponseStream
+              Resource:
+                - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-lite-v1:0"
       Events:
         ProxyResource:
           Type: HttpApi
@@ -148,6 +156,7 @@ Resources:
           - AllowedHeaders:
               - "*"
             AllowedMethods:
+              - HEAD
               - GET
               - PUT
               - POST

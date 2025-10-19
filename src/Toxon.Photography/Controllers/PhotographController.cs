@@ -13,7 +13,7 @@ namespace Toxon.Photography.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge eventBridge, MetadataProcessor metadataProcessor, ThumbnailProcessor thumbnailProcessor) : ControllerBase
+public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge eventBridge, MetadataProcessor metadataProcessor, ThumbnailProcessor thumbnailProcessor, TitleSuggestionProcessor titleSuggestionProcessor) : ControllerBase
 {
     private readonly ITable _photographTable = PhotographTable.Create(dynamoDb);
 
@@ -73,6 +73,22 @@ public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge e
         await SendEventAsync("create", photograph);
         
         return Created($"{photograph.Id}", photograph);
+    }
+    
+    [HttpPost("{id:guid}/suggestions")]
+    public async Task<IActionResult> SuggestTitles(Guid id)
+    {
+        var document = await _photographTable.GetItemAsync(id);
+        if (document == null)
+        {
+            return NotFound();
+        }
+
+        var photograph = PhotographSerialization.FromDocument(document);
+
+        var suggestedTitles = await titleSuggestionProcessor.SuggestTitlesAsync(photograph);
+
+        return Ok(suggestedTitles);
     }
     
     [HttpPut("{id:guid}")]

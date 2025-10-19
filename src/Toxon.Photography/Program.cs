@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Amazon;
+using Amazon.BedrockRuntime;
 using Amazon.DynamoDBv2;
 using Amazon.EventBridge;
 using Amazon.Extensions.NETCore.Setup;
@@ -27,6 +28,7 @@ builder.Services
 
 builder.Services.AddDefaultAWSOptions(new AWSOptions { Region = region });
 
+builder.Services.AddAWSService<IAmazonBedrockRuntime>();
 builder.Services.AddAWSService<IAmazonDynamoDB>();
 builder.Services.AddAWSService<IAmazonEventBridge>();
 builder.Services.AddAWSService<IAmazonLambda>();
@@ -36,6 +38,7 @@ builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 builder.Services.AddTransient<MetadataProcessor>();
 builder.Services.AddTransient<ThumbnailProcessor>();
+builder.Services.AddTransient<TitleSuggestionProcessor>();
 
 var app = builder.Build();
 
