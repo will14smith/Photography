@@ -48,6 +48,6 @@ public class DynamoDbImageProvider(IAmazonDynamoDB dynamoDb, [FromKeyedServices(
             });
         }
 
-        return new PhotographViewModel(photograph, thumbnailUrl);
+        return new PhotographViewModel(photograph, photograph.Layout!, thumbnailUrl);
     }
 }

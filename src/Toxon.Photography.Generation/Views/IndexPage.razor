@@ -16,21 +16,35 @@
             @foreach (var vm in Photographs)
             {
                 var photograph = vm.Photograph;
+                
+                var classNames = new List<string>();
+                
+                switch(vm.Layout.Width)
+                {
+                    case 2: classNames.Add("wide"); break;
+                    case 3: classNames.Add("wider"); break;
+                }
+                
+                switch(vm.Layout.Height)
+                {
+                    case 2: classNames.Add("tall"); break;
+                    case 3: classNames.Add("taller"); break;
+                }
 
-                <li>
-                    <img src="@(vm.ThumbnailUrl ?? "http://via.placeholder.com/350x233?text=Processing...")" alt="@photograph.Title" title="@photograph.Title" loading="lazy" onClick="openModal(this)">
+                <li class="@string.Join(" ", classNames)">
+                    <img src="@(vm.ThumbnailUrl ?? "https://placehold.co/350x233?text=Processing...")" alt="@photograph.Title" title="@photograph.Title" loading="lazy" onClick="openModal(this)">
                 </li>
             }
         </ul>
         
         <div class="modal fade" id="image-modal">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
                 <div class="modal-body">
                 </div>
             </div>
         </div>
         
-        <script>
+        <script type="text/javascript">
             const modalElem = document.querySelector("#image-modal");
             const modalImgElem = document.createElement("img");
             modalImgElem.style.maxWidth = "100%";
