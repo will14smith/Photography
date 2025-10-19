@@ -7,12 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Toxon.Photography.Data;
 using Toxon.Photography.Generation.Extensions;
 using Toxon.Photography.Models;
+using Toxon.Photography.ImageProcessing;
 
 namespace Toxon.Photography.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge eventBridge) : ControllerBase
+public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge eventBridge, MetadataProcessor metadataProcessor, ThumbnailProcessor thumbnailProcessor) : ControllerBase
 {
     private readonly ITable _photographTable = PhotographTable.Create(dynamoDb);
 
@@ -45,10 +46,30 @@ public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge e
     [ProducesResponseType<Photograph>(StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] PhotographCreateModel model)
     {
-        var photograph = model.ToPhotograph();
-
-        await _photographTable.PutItemAsync(PhotographSerialization.ToDocument(photograph));
+        var originalMetadata = await metadataProcessor.ProcessAsync(model.ImageKey);
+        var originalImage = new Image
+        {
+            Type = ImageType.Full,
+            ObjectKey = model.ImageKey,
+            
+            Width = originalMetadata.Width,
+            Height = originalMetadata.Height,
+        };
         
+        var defaultThumbnail = await thumbnailProcessor.Process(originalImage, ThumbnailSettings.Default);
+        
+        var photograph = new Photograph
+        {
+            Title = model.Title,
+            Images = [originalImage, defaultThumbnail],
+
+            CaptureTime = model.CaptureTime ?? originalMetadata.CaptureTime,
+            UploadTime = DateTime.UtcNow,
+            
+            Metadata = originalMetadata.ToDictionary(),
+        };
+        
+        await _photographTable.PutItemAsync(PhotographSerialization.ToDocument(photograph));
         await SendEventAsync("create", photograph);
         
         return Created($"{photograph.Id}", photograph);

@@ -1,7 +1,9 @@
-﻿namespace Toxon.Photography.ThumbnailProcessing;
+﻿namespace Toxon.Photography.ImageProcessing;
 
-internal class ThumbnailSettings
+public class ThumbnailSettings
 {
+    public static readonly ThumbnailSettings Default = new(width: 850, height: null, quality: 90);
+    
     public ThumbnailSettings(int? width, int? height, int quality)
     {
         if(!width.HasValue && !height.HasValue) throw new ArgumentException("One or both of Width and Height must be set");

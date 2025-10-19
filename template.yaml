@@ -37,7 +37,7 @@ Resources:
       CodeUri: ./src/Toxon.Photography/
       Handler: Toxon.Photography
       Runtime: dotnet8
-      MemorySize: 1024
+      MemorySize: 10240
       Environment:
         Variables:
           SITE_GENERATOR_LAMBDA: !Ref SiteGeneratorFunction
@@ -99,29 +99,6 @@ Resources:
           Properties:
             ScheduleExpression: "rate(1 day)"
             OmitName: true
-
-  ThumbnailProcessorFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: ./src/Toxon.Photography.ThumbnailProcessing
-      Handler: Toxon.Photography.ThumbnailProcessing::Toxon.Photography.ThumbnailProcessing.ThumbnailProcessorLambda::FunctionHandlerAsync
-      Runtime: dotnet8
-      MemorySize: 10240
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref PhotographyTable
-        - S3CrudPolicy:
-            BucketName: !Ref ImageBucket
-        - EventBridgePutEventsPolicy:
-            EventBusName: "*"
-      Events:
-        EventBridgeEvent:
-          Type: EventBridgeRule
-          Properties:
-            Pattern: 
-              "detail-type": 
-                - photograph.create
-
 
   SiteCloudfront:
     Type: AWS::CloudFront::Distribution

@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Photography.Data", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Photography.Generation", "src\Toxon.Photography.Generation\Toxon.Photography.Generation.csproj", "{3A0963BC-05F4-4A3E-8DC0-5E79369C3A98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Photography.ThumbnailProcessing", "src\Toxon.Photography.ThumbnailProcessing\Toxon.Photography.ThumbnailProcessing.csproj", "{F0A26412-2665-4E42-92F8-39AAB3F909AD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toxon.Photography.ImageProcessing", "src\Toxon.Photography.ImageProcessing\Toxon.Photography.ImageProcessing.csproj", "{F0A26412-2665-4E42-92F8-39AAB3F909AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
