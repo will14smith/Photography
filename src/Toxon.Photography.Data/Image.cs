@@ -4,8 +4,8 @@ namespace Toxon.Photography.Data
 {
     public class Image
     {
-        public ImageType Type { get; set; }
-        public string ObjectKey { get; set; }
+        public required ImageType Type { get; init; }
+        public required string ObjectKey { get; init; }
     }
 
     public enum ImageType
@@ -18,27 +18,23 @@ namespace Toxon.Photography.Data
     {
         public static class Fields
         {
-            public static readonly string Type = "type";
-            public static readonly string ObjectKey = "objectKey";
+            public const string Type = "type";
+            public const string ObjectKey = "objectKey";
         }
 
-        public static Image FromDocument(Document document)
-        {
-            return new Image
+        public static Image FromDocument(Document document) =>
+            new()
             {
                 Type = document[Fields.Type].AsEnum<ImageType>(),
                 ObjectKey = document[Fields.ObjectKey].AsString(),
             };
-        }
 
-        public static Document ToDocument(Image image)
-        {
-            return new Document
+        public static Document ToDocument(Image image) =>
+            new()
             {
                 [Fields.Type] = image.Type.ToString(),
                 [Fields.ObjectKey] = image.ObjectKey,
             };
-        }
     }
 
 }

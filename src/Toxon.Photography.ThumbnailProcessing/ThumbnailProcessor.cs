@@ -17,7 +17,7 @@ namespace Toxon.Photography.ThumbnailProcessing;
 
 public class ThumbnailProcessor(IAmazonDynamoDB dynamoDb, IAmazonEventBridge eventBridge, IAmazonS3 s3)
 {
-    private readonly Table _photographTable = Table.LoadTable(dynamoDb, TableNames.Photograph);
+    private readonly ITable _photographTable = PhotographTable.Create(dynamoDb);
     private readonly ThumbnailSettings _thumbnailSettings = new(width: 850, height: null, quality: 90);
 
     public async Task Process(Guid id)

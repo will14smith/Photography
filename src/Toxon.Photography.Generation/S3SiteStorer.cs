@@ -33,7 +33,7 @@ public class S3SiteStorer
             Key = file.Name,
 
             ContentType = file.ContentType,
-            Headers = { ExpiresUtc = DateTime.UtcNow.Add(SiteGeneratorLambda.ExpirationPeriod) },
+            Headers = { Expires = DateTime.UtcNow.Add(SiteGeneratorLambda.ExpirationPeriod) },
 
             InputStream = ms,
         };

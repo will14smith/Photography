@@ -6,7 +6,7 @@ namespace Toxon.Photography.ThumbnailProcessing;
 public class FunctionInput
 {
     [JsonPropertyName("detail-type")]
-    public string DetailType { get; set; }
+    public string? DetailType { get; set; }
     [JsonPropertyName("detail")]
-    public PhotographEvent Detail { get; set; }
+    public PhotographEvent? Detail { get; set; }
 }

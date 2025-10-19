@@ -32,6 +32,11 @@ public class ThumbnailProcessorLambda
 
     public async Task FunctionHandlerAsync(FunctionInput input)
     {
+        if(input.Detail?.Photograph == null)
+        {
+            throw new ArgumentException("Invalid input: missing detail or photograph");
+        }
+        
         await using var scope = _serviceProvider.CreateAsyncScope();
 
         var processor = scope.ServiceProvider.GetRequiredService<ThumbnailProcessor>();

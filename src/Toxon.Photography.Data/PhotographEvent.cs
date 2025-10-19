@@ -2,5 +2,5 @@
 
 public class PhotographEvent
 {
-    public Photograph Photograph { get; set; }
+    public Photograph? Photograph { get; set; }
 }

@@ -38,7 +38,7 @@ Resources:
       Handler: Toxon.Photography
       Runtime: dotnet8
       MemorySize: 1024
-      Environment: 
+      Environment:
         Variables:
           SITE_GENERATOR_LAMBDA: !Ref SiteGeneratorFunction
       Policies:

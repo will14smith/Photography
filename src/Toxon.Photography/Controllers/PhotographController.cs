@@ -5,7 +5,6 @@ using Amazon.EventBridge;
 using Amazon.EventBridge.Model;
 using Microsoft.AspNetCore.Mvc;
 using Toxon.Photography.Data;
-using Toxon.Photography.Data.Config;
 using Toxon.Photography.Generation.Extensions;
 using Toxon.Photography.Models;
 
@@ -15,7 +14,7 @@ namespace Toxon.Photography.Controllers;
 [Route("[controller]")]
 public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge eventBridge) : ControllerBase
 {
-    private readonly Table _photographTable = Table.LoadTable(dynamoDb, TableNames.Photograph);
+    private readonly ITable _photographTable = PhotographTable.Create(dynamoDb);
 
     [HttpGet]
     public async Task<IEnumerable<Photograph>> List()

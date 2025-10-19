@@ -5,30 +5,29 @@ namespace Toxon.Photography.Data
 {
     public class Layout
     {
-        public int Order { get; set; }
+        public required int Order { get; init; }
 
-        public int? Width { get; set; }
-        public int? Height { get; set; }
+        public int? Width { get; init; }
+        public int? Height { get; init; }
     }
-
-
+    
     public static class LayoutSerialization
     {
         public static class Fields
         {
-            public static readonly string Order = "Order";
-            public static readonly string Width = "Width";
-            public static readonly string Height = "Height";
+            public const string Order = "Order";
+            public const string Width = "Width";
+            public const string Height = "Height";
         }
 
-        public static Layout FromDocument(DynamoDBEntry entry)
+        public static Layout? FromDocument(DynamoDBEntry entry)
         {
             if (entry is DynamoDBNull)
             {
                 return null;
             }
 
-            if (entry is Primitive primitive && primitive.Type == DynamoDBEntryType.Numeric)
+            if (entry is Primitive { Type: DynamoDBEntryType.Numeric } primitive)
             {
                 var order = primitive.AsInt();
                 return new Layout { Order = order };
@@ -48,7 +47,7 @@ namespace Toxon.Photography.Data
             throw new Exception("Invalid format for Layout");
         }
 
-        public static Document ToDocument(Layout layout)
+        public static Document? ToDocument(Layout? layout)
         {
             if (layout == null)
             {

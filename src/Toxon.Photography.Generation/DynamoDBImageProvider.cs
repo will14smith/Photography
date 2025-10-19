@@ -13,8 +13,8 @@ namespace Toxon.Photography.Generation;
 public class DynamoDbImageProvider(IAmazonDynamoDB dynamoDb, [FromKeyedServices(DynamoDbImageProvider.S3ClientInjectionKey)] IAmazonS3 s3)
 {
     internal const string S3ClientInjectionKey = $"{nameof(DynamoDbImageProvider)}.{nameof(IAmazonS3)}";
-    
-    private readonly Table _photographs = Table.LoadTable(dynamoDb, TableNames.Photograph);
+
+    private readonly ITable _photographs = PhotographTable.Create(dynamoDb);
 
     public async Task<IEnumerable<PhotographViewModel>> GetPrimaryPhotographsAsync()
     {
@@ -27,13 +27,14 @@ public class DynamoDbImageProvider(IAmazonDynamoDB dynamoDb, [FromKeyedServices(
         var documents = await search.GetAllAsync();
         return documents
             .Select(PhotographSerialization.FromDocument)
-            .OrderBy(x => x.Layout.Order)
+            // filter ensures layout is not null
+            .OrderBy(x => x.Layout!.Order)
             .Select(ToViewModel);
     }
 
     private PhotographViewModel ToViewModel(Photograph photograph)
     {
-        string thumbnailUrl = null;
+        string? thumbnailUrl = null;
 
         var thumbnail = photograph.Images.LastOrDefault(x => x.Type == ImageType.Thumbnail);
         if (thumbnail != null)

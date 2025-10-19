@@ -2,7 +2,6 @@
 using Amazon.DynamoDBv2.DocumentModel;
 using Microsoft.AspNetCore.Mvc;
 using Toxon.Photography.Data;
-using Toxon.Photography.Data.Config;
 using Toxon.Photography.Generation.Extensions;
 using Toxon.Photography.Models;
 
@@ -12,7 +11,7 @@ namespace Toxon.Photography.Controllers;
 [Route("layout")]
 public class LayoutController(IAmazonDynamoDB dynamoDb) : ControllerBase
 {
-    private readonly Table _photographTable = Table.LoadTable(dynamoDb, TableNames.Photograph);
+    private readonly ITable _photographTable = PhotographTable.Create(dynamoDb);
 
     [HttpPut]
     [ProducesResponseType(StatusCodes.Status202Accepted)]

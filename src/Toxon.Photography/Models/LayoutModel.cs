@@ -2,8 +2,8 @@
 
 public class LayoutModel
 {
-    public int Order { get; set; }
+    public required int Order { get; init; }
 
-    public int? Width { get; set; }
-    public int? Height { get; set; }
+    public int? Width { get; init; }
+    public int? Height { get; init; }
 }
