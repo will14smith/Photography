@@ -23,12 +23,14 @@
                 {
                     case 2: classNames.Add("wide"); break;
                     case 3: classNames.Add("wider"); break;
+                    case 4: classNames.Add("widest"); break;
                 }
                 
                 switch(vm.Layout.Height)
                 {
                     case 2: classNames.Add("tall"); break;
                     case 3: classNames.Add("taller"); break;
+                    case 4: classNames.Add("tallest"); break;
                 }
 
                 <li class="@string.Join(" ", classNames)">

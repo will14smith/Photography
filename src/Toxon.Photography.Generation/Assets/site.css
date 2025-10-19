@@ -40,15 +40,22 @@ footer a:hover.text-body-secondary {
 ul.gallery .wider {
     grid-column: span 3;
 }
+ul.gallery .widest {
+    grid-column: span 4;
+}
 
 ul.gallery .tall {
     grid-row: span 2;
     height: auto;
 }
 ul.gallery .taller {
-     grid-row: span 3;
-     height: auto;
- }
+    grid-row: span 3;
+    height: auto;
+}
+ul.gallery .tallest {
+    grid-row: span 4;
+    height: auto;
+}
 
 .gallery img {
     display: block;
