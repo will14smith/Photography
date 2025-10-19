@@ -1,10 +1,12 @@
 ﻿using System.Text.Json;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
 using Amazon.EventBridge;
 using Amazon.EventBridge.Model;
 using Microsoft.AspNetCore.Mvc;
 using Toxon.Photography.Data;
+using Toxon.Photography.Data.Config;
 using Toxon.Photography.Generation.Extensions;
 using Toxon.Photography.Models;
 using Toxon.Photography.ImageProcessing;
@@ -76,6 +78,7 @@ public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge e
     }
     
     [HttpPost("{id:guid}/suggestions")]
+    [ProducesResponseType<string[]>(StatusCodes.Status200OK)]
     public async Task<IActionResult> SuggestTitles(Guid id)
     {
         var document = await _photographTable.GetItemAsync(id);
@@ -105,6 +108,50 @@ public class PhotographController(IAmazonDynamoDB dynamoDb, IAmazonEventBridge e
 
         return Accepted(photograph);
     }
+
+    [HttpPost("{id:guid}/thumbnail")]
+    [ProducesResponseType<Photograph>(StatusCodes.Status202Accepted)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Thumbnail(Guid id, [FromBody] PhotographyThumbnailModel model)
+    {
+        var document = await _photographTable.GetItemAsync(id);
+        if (document == null)
+        {
+            return NotFound();
+        }
+        
+        var photograph = PhotographSerialization.FromDocument(document);
+
+        var image = photograph.Images.FirstOrDefault(x => x.Type == ImageType.Full);
+        if (image == null)
+        {
+            return BadRequest("Photograph does not have a full image to create a thumbnail from.");
+        }
+        
+        var thumbnail = await thumbnailProcessor.Process(image, new ThumbnailSettings(model.Width, model.Height, 90));
+        
+        var thumbnailDocument = ImageSerialization.ToDocument(thumbnail);
+        var response = await dynamoDb.UpdateItemAsync(new UpdateItemRequest
+        {
+            TableName = TableNames.Photograph,
+
+            Key = new Dictionary<string, AttributeValue> { { "id", new AttributeValue { S = photograph.Id.ToString() } } },
+            UpdateExpression = "SET #images = list_append(#images, :thumbnails)",
+            ExpressionAttributeNames = new Dictionary<string, string> { { "#images", PhotographSerialization.Fields.Images } },
+            ExpressionAttributeValues = new Dictionary<string, AttributeValue> { { ":thumbnails", new AttributeValue { L = [new AttributeValue { M = thumbnailDocument.ToAttributeMap() }] } } },
+            
+            ReturnValues = ReturnValue.ALL_NEW
+        });
+        
+        document = Document.FromAttributeMap(response.Attributes);
+        photograph = PhotographSerialization.FromDocument(document);
+        
+        await SendEventAsync("update", photograph);
+
+        return Accepted(photograph);
+    }    
+    
 
     public async Task SendEventAsync(string action, Photograph photograph)
     {
