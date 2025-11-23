@@ -1,0 +1,169 @@
+﻿@page "/stories/{Slug}.html"
+@using Toxon.Photography.Data
+@using Toxon.Photography.Generation.Models
+
+<LayoutView Layout="typeof(Layout)">
+    <style>
+        :root {
+            --story-font-family-serif: "Georgia", serif;
+        }
+        
+        /* Story Title */
+        .story-title h1 {
+            font-family: var(--story-font-family-serif), serif;
+        }
+        .story-title p {
+            color: var(--bs-secondary-text-emphasis);
+            text-transform: uppercase;
+        }
+        
+        .story-section {
+            padding: 3rem 0;
+        }
+        
+        .story-section-title {
+            border-left: 4px solid var(--bs-warning);
+            padding-left: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .story-section-title h2 {
+            font-family: var(--story-font-family-serif), serif;
+        }
+        .story-section-title p {
+            color: var(--bs-secondary-text-emphasis);
+            text-transform: uppercase;
+        }
+
+        .story-block { 
+            margin-bottom: 3em;
+        }
+        
+        .story-block-text {
+            font-family: var(--story-font-family-serif), serif;
+        }
+        
+        .story-block-image {
+            text-align: center;
+        }
+        .story-image-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+        .story-image-container img {
+            width: 100%;
+            height: auto;
+            max-height: 75vh;
+            object-fit: contain;
+            display: block;
+            border-radius: var(--bs-border-radius);
+            box-shadow: var(--bs-box-shadow-lg);
+            transition: transform 0.4s ease;
+        }
+        .story-image-caption {
+            font-size: calc(var(--bs-body-font-size) * 0.875);
+            color: var(--bs-secondary-text-emphasis);
+            font-style: italic;
+            padding-top: 0.5rem;
+            padding-left: 0.5rem;
+        }
+    </style>
+    
+    <div class="row story-title">
+        <div class="col-12 text-center">
+            <h1>@Story.Title</h1>
+            <p>@FormatDateRange(Story.StartDate, Story.EndDate)</p>
+        </div>
+    </div>
+
+    @foreach (var storySection in Story.Sections)
+    {
+        <div class="row story-section">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="story-section-title">
+                    <h2>@storySection.Title</h2>
+                    <p>@FormatDateRange(storySection.StartDate, storySection.EndDate)</p>
+                </div>
+
+                @foreach (var block in storySection.Blocks.Where(x => x is not SuggestionBlock))
+                {
+                    <div class="story-block story-block-@block.Type">
+                        @switch (block)
+                        {
+                            case TextBlock textBlock:
+                                <p>@textBlock.Content</p>
+                                break;
+
+                            case ImageBlock imageBlock:
+                                var photographExists = Photographs.TryGetValue(imageBlock.PhotographId ?? "", out var photograph);
+                                
+                                <div class="story-image-container">
+                                    <img src="@(photographExists ? photograph!.ThumbnailUrl : "missing.png")" alt="@(photographExists ? photograph!.Photograph.Title : "missing photograph")"/>
+                                </div>
+                                
+                                <div class="story-image-caption">
+                                    @imageBlock.Caption
+                                </div>
+                                break;
+
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(block));
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</LayoutView>
+
+
+@code {
+    [Parameter, EditorRequired]
+    public string Slug { get; set; }
+    
+    [Parameter, EditorRequired]
+    public Story Story { get; set; }
+    
+    [Parameter, EditorRequired]
+    public IReadOnlyDictionary<string, PhotographViewModel> Photographs { get; set; }
+    
+    private string FormatDateRange(DateTime? startDateOptional, DateTime? endDateOptional)
+    {
+        // "fancy" formatting, e.g. "January 1-3, 2020" or "January 30 - February 2, 2020"
+        if (startDateOptional == null && endDateOptional == null)
+        {
+            return "????-??-??";
+        }
+
+        if (startDateOptional == null)
+        {
+            return $"????-??-?? - {endDateOptional!.Value:MMMM} {endDateOptional.Value.Day}, {endDateOptional.Value:yyyy}";
+        }
+        
+        var startDate = startDateOptional.Value;
+
+        if (endDateOptional == null)
+        {
+            return $"{startDate:MMMM} {startDate.Day}, {startDate:yyyy} - ????-??-??";
+        }
+        
+        var endDate = endDateOptional.Value;
+
+        if (startDate.Year == endDate.Year)
+        {
+            if (startDate.Month == endDate.Month)
+            {
+                if(startDate.Day == endDate.Day)
+                {
+                    return $"{startDate:MMMM} {startDate.Day}, {startDate:yyyy}";
+                }
+                
+                return $"{startDate:MMMM} {startDate.Day} - {endDate.Day}, {startDate:yyyy}";
+            }
+
+            return $"{startDate:MMMM} {startDate.Day} - {endDate:MMMM} {endDate.Day}, {startDate:yyyy}";
+        }
+
+        return $"{startDate:MMMM} {startDate.Day}, {startDate:yyyy} - {endDate:MMMM} {endDate.Day}, {endDate:yyyy}";
+    }
+}

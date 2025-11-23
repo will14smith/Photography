@@ -6,6 +6,7 @@ using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Toxon.Photography.Data.Config;
+using Toxon.Photography.Generation.Stories;
 
 namespace Toxon.Photography.Generation;
 
@@ -35,6 +36,7 @@ public class SiteGeneratorLambda
 
         services.AddScoped<SiteGenerator>();
         services.AddScoped<DynamoDbImageProvider>();
+        services.AddScoped<StoryProvider>();
         services.AddScoped<S3SiteStorer>();
     }
 
