@@ -21,7 +21,7 @@ public class StoryGenerationService(IAmazonBedrockRuntime bedrock, IAmazonDynamo
         
         if (story is { StartDate: not null, EndDate: not null })
         {
-            optionDatePrompt = $", the user has provided start date ({story.StartDate:yyyy-MM-dd}) and end date ({story.EndDate:yyyy-MM-dd}) to help identify date ranges.";
+            optionDatePrompt = $", the user has provided start date ({story.StartDate:yyyy-MM-dd}) and end date ({story.EndDate:yyyy-MM-dd}) to help identify date ranges";
 
             var (_, availablePhotographsJson) = await GetImagesInDateRangeAsync(story.StartDate, story.EndDate);
             imagePrompt = $", consider available images from this date range to help with sectioning, but remember that suggestions can be given later to upload additional images: {availablePhotographsJson}";
@@ -135,59 +135,67 @@ public class StoryGenerationService(IAmazonBedrockRuntime bedrock, IAmazonDynamo
         var (photographs, availablePhotographsJson) = await GetImagesInDateRangeAsync(section.DateRange.Start, section.DateRange.End);
 
         var prompt = $$"""
-                       Create detailed content blocks for this section. You'll work with:
-                       1. The planned section structure
-                       2. Relevant journal text
-                       3. Available images from this time period
+                        # Travel Journal Content Block Creator
+                        
+                        ## Task Description
+                        You are a professional travel content editor tasked with creating engaging, well-structured content blocks for a travel journal section. Your goal is to transform raw journal entries into a polished narrative while preserving the authentic voice and key details.
+                        
+                        ## Input Materials
+                        You will work with:
+                        1. A planned section structure (title, date range, summary)
+                        2. Raw journal text entries for the whole trip, which may include details outside the section date range for context
+                        3. Available images from this time period (if any)
+                        
+                        ## Section Information
+                        - Title: "{{section.Title}}"
+                        - Date range: "{{section.DateRange.Start:yyyy-MM-dd}}" to "{{section.DateRange.End:yyyy-MM-dd}}"
+                        - Summary: "{{section.Summary}}"
+                        - Theme: "{{section.Theme}}"
 
-                       Section outline:
-                       - Title: "{{section.Title}}"
-                       - Date range: "{{section.DateRange.Start:yyyy-MM-dd}}" to "{{section.DateRange.End:yyyy-MM-dd}}"
-                       - Summary: "{{section.Summary}}"
-                       - Theme: "{{section.Theme}}"
+                        ## Journal Entries
+                        {{story.Journal}}
 
-                       Journal (full, will need filtered for the section date range, but can reference previous events for context):
-                       {{story.Journal}}
+                        ## Available Images
+                        {{availablePhotographsJson}}
 
-                       Available images in section date range: {{availablePhotographsJson}}
-
-                       Create blocks that:
-                       - Use available images where they naturally enhance the narrative, the photographId is a foreign key so MUST reference the images above, having no images is acceptable
-                       - Add suggestion blocks for places where an additional image could be uploaded help the narrative and there is no suitable image available
-                       - Where possible text synthesised from the journal should be used as the caption for images
-                       - Write narrative text that improves flow while preserving authentic details and voice, generally using the first person, the length of text blocks should generally be a paragraph, 3 - 8 sentences, although shorter or longer is acceptable where appropriate
-                       - Alternate between text and visual content for engaging rhythm
-                       - Only create "text", "image", and "suggestion" block types
-
-                       Output JSON:
-                       [
-                         {
-                           "$type": "text",
-                           "content": "I set my alarm for 05:30, determined to experience Fushimi Inari before the tour groups arrived. The early train was nearly empty, filled only with a few dedicated photographers and fellow early risers. As I approached the shrine, the first torii gates glowed in the predawn light."
-                         },
-                         {
-                           "$type": "image",
-                           "photographId": "<guid from list of available images>",
-                           "caption": "The tunnel of vermillion gates seemed to stretch endlessly up the mountainside"
-                         },
-                         {
-                           "$type": "text",
-                           "content": "The torii gates formed an otherworldly tunnel, each one donated by businesses and families over centuries. The path wound upward through the forest, occasionally opening to reveal smaller shrines and fox statues. By the time I reached the summit, my legs were burning, but the panoramic view of Kyoto spreading out below made every step worthwhile."
-                         },
-                         {
-                           "$type": "suggestion",
-                           "prompt": "Consider including a photograph of the monk who explained the temple's water purification rituals at the Otowa Waterfall"
-                         },
-                         {
-                           "$type": "text",
-                           "content": "After descending and grabbing a quick breakfast, I made my way to Kiyomizu-dera. The temple's famous wooden stage, built without a single nail, projects out from the hillside like a ship's prow. Standing on it, surrounded by other visitors, I could see why this view has captivated people for over a thousand years."
-                         },
-                         {
-                           "$type": "image",
-                           "photographId": "<guid from list of available images>",
-                         }
-                       ]
-                       """;
+                        ## Instructions
+                        Create a series of content blocks that tell the story of this travel segment in an engaging, authentic way. Follow these guidelines:
+                        
+                        1. **Content Creation Guidelines:**
+                           - Write narrative text that improves flow while preserving authentic details and voice
+                           - Use first-person perspective to maintain the personal journal feel
+                           - Vary paragraph length to create an engaging rhythm
+                           - Synthesize information from the journal entries for the specified date range
+                           - You may reference previous events for context when relevant, but avoid anything past the section end date
+                        
+                        2. **Visual Content Guidelines:**
+                           - Use available images where they naturally enhance the narrative
+                           - Each image must reference an actual photographId from the available images list
+                           - Create suggestion blocks for places where additional images would enhance the narrative
+                           - When possible, use text from the journal as image captions
+                        
+                        3. **Structure Guidelines:**
+                           - Alternate between text and visual content for an engaging rhythm
+                           - Only create "text", "image", and "suggestion" block types
+                           - Ensure the blocks flow logically and tell a cohesive story
+                        
+                        ## Output Format
+                        Provide your response as a valid JSON array of content blocks. Each block should have the appropriate structure based on its type:
+                        
+                        ```json
+                        [
+                          {"$type": "text",
+                            "content": "Narrative text paragraph here..."},
+                          {"$type": "image",
+                            "photographId": "<guid from list of available images>",
+                            "caption": "Caption text here (optional)"},
+                          {"$type": "suggestion",
+                            "prompt": "Suggestion for additional image to upload"}
+                        ]
+                        ```
+                        
+                        Create a concise, engaging narrative that captures the essence of this travel experience while maintaining the authentic voice from the journal entries.
+                        """;
         
         var buffer = $$"""
                        {
