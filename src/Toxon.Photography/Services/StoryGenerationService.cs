@@ -16,9 +16,16 @@ public class StoryGenerationService(IAmazonBedrockRuntime bedrock, IAmazonDynamo
     
     public async Task<StoryAnalysis> AnalyseStoryForSectionsAsync(Story story)
     {
-        var optionDatePrompt = story is { StartDate: not null, EndDate: not null }
-            ? $", the user has provided start date ({story.StartDate:yyyy-MM-dd}) and end date ({story.EndDate:yyyy-MM-dd}) to help identify date ranges."
-            : "";
+        var optionDatePrompt = "";
+        var imagePrompt = " - don't worry about available images yet.";
+        
+        if (story is { StartDate: not null, EndDate: not null })
+        {
+            optionDatePrompt = $", the user has provided start date ({story.StartDate:yyyy-MM-dd}) and end date ({story.EndDate:yyyy-MM-dd}) to help identify date ranges.";
+
+            var (_, availablePhotographsJson) = await GetImagesInDateRangeAsync(story.StartDate, story.EndDate);
+            imagePrompt = $", consider available images from this date range to help with sectioning, but remember that suggestions can be given later to upload additional images: {availablePhotographsJson}";
+        }
         
         var prompt = $$"""
                        Analyze this travel journal and create a section outline for a photo story.
@@ -40,7 +47,7 @@ public class StoryGenerationService(IAmazonBedrockRuntime bedrock, IAmazonDynamo
                        - Identify the narrative theme
                        - If a grammatical perspective is needed then prefer the first person
 
-                       Focus on the best way to tell the story - don't worry about available images yet.
+                       Focus on the best way to tell the story{{imagePrompt}}
 
                        Journal:
                        {{story.Journal}}
@@ -107,7 +114,7 @@ public class StoryGenerationService(IAmazonBedrockRuntime bedrock, IAmazonDynamo
         using var body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(buffer));
         var request = new InvokeModelRequest
         {
-            ModelId = "amazon.nova-lite-v1:0",
+            ModelId = "amazon.nova-pro-v1:0",
             Body = body,
             ContentType = "application/json",
         };
@@ -125,37 +132,33 @@ public class StoryGenerationService(IAmazonBedrockRuntime bedrock, IAmazonDynamo
     
     public async Task<IEnumerable<Block>> GenerateSectionBlocksAsync(Story story, StorySectionAnalysis section)
     {
-        var filter = new ScanFilter();
-        filter.AddCondition(PhotographSerialization.Fields.CaptureTime, ScanOperator.Between, section.DateRange.Start?.Date, section.DateRange.End?.Date.AddDays(1));
-        var photographDocuments = await _photographTable.Scan(filter).GetAllAsync();
-        var photographs = photographDocuments.Select(PhotographSerialization.FromDocument).ToList();
-        var availablePhotographsJson = JsonSerializer.Serialize(photographs.Select(x => new { x.Id, x.Title, x.CaptureTime }));
-        
+        var (photographs, availablePhotographsJson) = await GetImagesInDateRangeAsync(section.DateRange.Start, section.DateRange.End);
+
         var prompt = $$"""
                        Create detailed content blocks for this section. You'll work with:
                        1. The planned section structure
                        2. Relevant journal text
                        3. Available images from this time period
-                       
+
                        Section outline:
                        - Title: "{{section.Title}}"
                        - Date range: "{{section.DateRange.Start:yyyy-MM-dd}}" to "{{section.DateRange.End:yyyy-MM-dd}}"
                        - Summary: "{{section.Summary}}"
                        - Theme: "{{section.Theme}}"
-                       
+
                        Journal (full, will need filtered for the section date range, but can reference previous events for context):
                        {{story.Journal}}
-                       
+
                        Available images in section date range: {{availablePhotographsJson}}
-                       
+
                        Create blocks that:
                        - Use available images where they naturally enhance the narrative, the photographId is a foreign key so MUST reference the images above, having no images is acceptable
                        - Add suggestion blocks for places where an additional image could be uploaded help the narrative and there is no suitable image available
                        - Where possible text synthesised from the journal should be used as the caption for images
-                       - Write narrative text that improves flow while preserving authentic details and voice, generally using the first person
+                       - Write narrative text that improves flow while preserving authentic details and voice, generally using the first person, the length of text blocks should generally be a paragraph, 3 - 8 sentences, although shorter or longer is acceptable where appropriate
                        - Alternate between text and visual content for engaging rhythm
                        - Only create "text", "image", and "suggestion" block types
-                       
+
                        Output JSON:
                        [
                          {
@@ -215,7 +218,7 @@ public class StoryGenerationService(IAmazonBedrockRuntime bedrock, IAmazonDynamo
         using var body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(buffer));
         var request = new InvokeModelRequest
         {
-            ModelId = "amazon.nova-lite-v1:0",
+            ModelId = "amazon.nova-pro-v1:0",
             Body = body,
             ContentType = "application/json",
         };
@@ -243,5 +246,18 @@ public class StoryGenerationService(IAmazonBedrockRuntime bedrock, IAmazonDynamo
                 ? new SuggestionBlock { Prompt = imageBlock.Caption ?? "Consider adding an image" }
                 : block;
         });
+    }
+
+    private async Task<(List<Photograph> photographs, string availablePhotographsJson)> GetImagesInDateRangeAsync(DateTime? startDate, DateTime? endDate)
+    {
+        var filter = new ScanFilter();
+        filter.AddCondition(PhotographSerialization.Fields.CaptureTime, ScanOperator.Between, startDate?.Date, endDate?.Date.AddDays(1));
+        
+        var photographDocuments = await _photographTable.Scan(filter).GetAllAsync();
+        var photographs = photographDocuments.Select(PhotographSerialization.FromDocument).ToList();
+        
+        var availablePhotographsJson = JsonSerializer.Serialize(photographs.Select(x => new { x.Id, x.Title, x.CaptureTime }));
+        
+        return (photographs, availablePhotographsJson);
     }
 }

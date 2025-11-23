@@ -61,6 +61,7 @@ Resources:
                 - bedrock:InvokeModelWithResponseStream
               Resource:
                 - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-lite-v1:0"
+                - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-pro-v1:0"
       Events:
         ProxyResource:
           Type: HttpApi
