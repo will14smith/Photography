@@ -7,7 +7,6 @@ using Amazon.EventBridge.Model;
 using Microsoft.AspNetCore.Mvc;
 using Toxon.Photography.Data;
 using Toxon.Photography.Data.Config;
-using Toxon.Photography.Generation.Extensions;
 using Toxon.Photography.Models;
 using Toxon.Photography.ImageProcessing;
 

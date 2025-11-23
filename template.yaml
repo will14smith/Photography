@@ -21,6 +21,7 @@ Globals:
     Environment:
       Variables:
         PHOTOGRAPH_TABLE: !Ref PhotographyTable
+        STORY_TABLE: !Ref StoriesTable
         IMAGE_BUCKET: !Ref ImageBucket
         SITE_BUCKET: !Ref SiteBucket
 
@@ -44,6 +45,8 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref PhotographyTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StoriesTable
         - S3CrudPolicy:
             BucketName: !Ref ImageBucket
         - LambdaInvokePolicy:
@@ -145,6 +148,17 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
         
+  StoriesTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Join ["-", ["photography-stories", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
   ImageBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain

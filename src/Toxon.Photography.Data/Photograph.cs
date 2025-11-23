@@ -82,6 +82,6 @@ public static class PhotographSerialization
 public static class PhotographTable
 {
     public static ITable Create(IAmazonDynamoDB client) => new TableBuilder(client, TableNames.Photograph)
-        .AddHashKey("id", DynamoDBEntryType.String)
+        .AddHashKey(PhotographSerialization.Fields.Id, DynamoDBEntryType.String)
         .Build();
 }

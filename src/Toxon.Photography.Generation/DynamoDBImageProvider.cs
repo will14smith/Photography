@@ -5,7 +5,6 @@ using Amazon.S3.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Toxon.Photography.Data;
 using Toxon.Photography.Data.Config;
-using Toxon.Photography.Generation.Extensions;
 using Toxon.Photography.Generation.Models;
 
 namespace Toxon.Photography.Generation;

@@ -1,6 +1,8 @@
-﻿using Amazon.DynamoDBv2.DocumentModel;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Amazon.DynamoDBv2.DocumentModel;
 
-namespace Toxon.Photography.Generation.Extensions;
+namespace Toxon.Photography.Data;
 
 public static class DynamoDbSearchExtensions
 {
