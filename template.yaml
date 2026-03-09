@@ -92,6 +92,8 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref PhotographyTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref StoriesTable
         - S3ReadPolicy:
             BucketName: !Ref ImageBucket
         - S3CrudPolicy:
