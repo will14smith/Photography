@@ -1,18 +1,12 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
-using Amazon.S3;
-using Amazon.S3.Model;
-using Microsoft.Extensions.DependencyInjection;
 using Toxon.Photography.Data;
-using Toxon.Photography.Data.Config;
 using Toxon.Photography.Generation.Models;
 
 namespace Toxon.Photography.Generation;
 
-public class DynamoDbImageProvider(IAmazonDynamoDB dynamoDb, [FromKeyedServices(DynamoDbImageProvider.S3ClientInjectionKey)] IAmazonS3 s3)
+public class DynamoDbImageProvider(IAmazonDynamoDB dynamoDb, CloudFrontSignedUrlGenerator signedUrlGenerator)
 {
-    internal const string S3ClientInjectionKey = $"{nameof(DynamoDbImageProvider)}.{nameof(IAmazonS3)}";
-
     private readonly ITable _photographs = PhotographTable.Create(dynamoDb);
 
     public async Task<IEnumerable<PhotographWithLayoutViewModel>> GetPrimaryPhotographsAsync()
@@ -56,13 +50,7 @@ public class DynamoDbImageProvider(IAmazonDynamoDB dynamoDb, [FromKeyedServices(
         var thumbnail = photograph.Images.LastOrDefault(x => x.Type == ImageType.Thumbnail);
         if (thumbnail != null)
         {
-            thumbnailUrl = s3.GetPreSignedURL(new GetPreSignedUrlRequest
-            {
-                BucketName = BucketNames.Images,
-                Key = thumbnail.ObjectKey,
-
-                Expires = DateTime.UtcNow.Add(SiteGeneratorLambda.ExpirationPeriod),
-            });
+            thumbnailUrl = signedUrlGenerator.GetSignedUrl(thumbnail.ObjectKey);
         }
 
         return thumbnailUrl;
