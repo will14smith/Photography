@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Files/">
+    <File Path="README.md" />
+    <File Path="samconfig.toml" />
+    <File Path="template.yaml" />
+  </Folder>
+  <Project Path="src/Toxon.Photography.Data/Toxon.Photography.Data.csproj" />
+  <Project Path="src/Toxon.Photography.Generation/Toxon.Photography.Generation.csproj" />
+  <Project Path="src/Toxon.Photography.ImageProcessing.Tests/Toxon.Photography.ImageProcessing.Tests.csproj" />
+  <Project Path="src/Toxon.Photography.ImageProcessing/Toxon.Photography.ImageProcessing.csproj" />
+  <Project Path="src/Toxon.Photography/Toxon.Photography.csproj" />
+</Solution>

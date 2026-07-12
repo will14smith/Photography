@@ -33,7 +33,7 @@ flowchart LR
 
   Cognito[Cognito User + Identity Pools]
   HttpApi[API Gateway HttpApi IAM authorizer]
-  ApiLambda[Lambda Toxon.Photography .NET 8 API]
+  ApiLambda[Lambda Toxon.Photography .NET 10 API]
 
   PhotoTable[(DynamoDB: photography)]
   StoryTable[(DynamoDB: photography-stories)]

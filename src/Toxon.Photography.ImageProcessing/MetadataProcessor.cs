@@ -1,6 +1,9 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using Amazon.S3;
-using SixLabors.ImageSharp.Metadata.Profiles.Exif;
+using MetadataExtractor;
+using MetadataExtractor.Formats.Exif;
+using SkiaSharp;
 using Toxon.Photography.Data.Config;
 
 namespace Toxon.Photography.ImageProcessing;
@@ -14,9 +17,16 @@ public class MetadataProcessor(IAmazonS3 s3)
         return await ExtractMetadataAsync(image);
     }
 
-    private async Task<Metadata> ExtractMetadataAsync(Stream input)
+    public async static Task<Metadata> ExtractMetadataAsync(Stream input)
     {
-        using var image = await SixLabors.ImageSharp.Image.LoadAsync(input);
+        using var memoryStream = new MemoryStream();
+        await input.CopyToAsync(memoryStream);
+        
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        var directories = ImageMetadataReader.ReadMetadata(memoryStream);
+        
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        using var image = SKBitmap.Decode(memoryStream);
         
         var metadata = new Metadata
         {
@@ -24,62 +34,68 @@ public class MetadataProcessor(IAmazonS3 s3)
             Height = image.Height
         };
         
-        if (image.Metadata.ExifProfile != null)
+        foreach (var directory in directories)
         {
-            PopulateFromExif(metadata, image.Metadata.ExifProfile);
+            switch (directory)
+            {
+                case ExifSubIfdDirectory exif:
+                    PopulateFromExif(metadata, exif);
+                    break;
+                
+                default:
+                    Debug.WriteLine("Skipping unknown directory: {0}", directory);
+                    break;
+            }
         }
-
+        
         return metadata;
     }
 
-    private static void PopulateFromExif(Metadata metadata, ExifProfile exif)
+    private static void PopulateFromExif(Metadata metadata, ExifSubIfdDirectory exif)
     {
-        if (exif.TryGetValue(ExifTag.DateTimeOriginal, out var dateTimeOriginal) && dateTimeOriginal.Value is not null)
+        if (exif.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, out var dateTimeOriginal))
         {
-            if (DateTime.TryParseExact(dateTimeOriginal.Value, "yyyy:MM:dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDateTimeOriginal))
-            {
-                metadata.CaptureTime = parsedDateTimeOriginal;
-            }
+            metadata.CaptureTime = dateTimeOriginal;
         }
             
-        if (exif.TryGetValue(ExifTag.ExposureTime, out var exposureTime))
+        if (exif.TryGetRational(ExifDirectoryBase.TagExposureTime, out var exposureTime))
         {
-            var value = exposureTime.Value.Numerator / (decimal)exposureTime.Value.Denominator;
+            var value = exposureTime.Numerator / (decimal)exposureTime.Denominator;
             
-            metadata.Exposure = $"{(value < 0 ? exposureTime.Value.ToString() : value.ToString("0.0"))} sec";
+            metadata.Exposure = $"{(value < 0 ? exposureTime.ToString(CultureInfo.InvariantCulture) : value.ToString("0.0"))} sec";
         }
             
-        if (exif.TryGetValue(ExifTag.FNumber, out var fNumber))
+        if (exif.TryGetRational(ExifDirectoryBase.TagFNumber, out var fNumber))
         {
-            var value = fNumber.Value.Numerator / (decimal)fNumber.Value.Denominator;
+            var value = fNumber.Numerator / (decimal)fNumber.Denominator;
             metadata.Aperture = $"f/{value:0.0}";
         }
             
-        if (exif.TryGetValue(ExifTag.FocalLength, out var focalLength))
+        if (exif.TryGetRational(ExifDirectoryBase.TagFocalLength, out var focalLength))
         {
-            var value = focalLength.Value.Numerator / (decimal)focalLength.Value.Denominator;
+            var value = focalLength.Numerator / (decimal)focalLength.Denominator;
             metadata.FocalLength = $"{value:0}mm";
         }
             
-        if (exif.TryGetValue(ExifTag.ISOSpeed, out var isoSpeed))
+        if (exif.TryGetInt64(ExifDirectoryBase.TagIsoSpeed, out var isoSpeed))
         {
-            metadata.ISO = $"ISO {isoSpeed.Value}";
+            metadata.ISO = $"ISO {isoSpeed}";
         }
             
-        if ((exif.TryGetValue(ExifTag.LensMake, out var lensMake) && lensMake.Value is not null) |
-            (exif.TryGetValue(ExifTag.LensModel, out var lensModel) && lensModel.Value is not null))
+        var lensMake = exif.GetString(ExifDirectoryBase.TagLensMake);
+        var lensModel = exif.GetString(ExifDirectoryBase.TagLensModel);
+        
+        if (lensMake  is not null ||  lensModel is not null)
         {
-            var lensMakeValue = lensMake?.Value ?? string.Empty;
-            var lensModelValue = lensModel?.Value ?? string.Empty;
-            metadata.Lens = $"{lensMakeValue} {lensModelValue}".Trim();
+            metadata.Lens = $"{lensMake ?? string.Empty} {lensModel ?? string.Empty}".Trim();
         }
 
-        if ((exif.TryGetValue(ExifTag.Make, out var cameraMake) && cameraMake.Value is not null) |
-            (exif.TryGetValue(ExifTag.Model, out var cameraModel) && cameraModel.Value is not null))
+        var cameraMake = exif.GetString(ExifDirectoryBase.TagMake);
+        var cameraModel = exif.GetString(ExifDirectoryBase.TagModel);
+        
+        if (cameraMake is not null || cameraModel is not null)
         {
-            var cameraMakeValue = cameraMake?.Value ?? string.Empty;
-            var cameraModelValue = cameraModel?.Value ?? string.Empty;
-            metadata.Camera = $"{cameraMakeValue} {cameraModelValue}".Trim();
+            metadata.Camera = $"{cameraMake ?? string.Empty} {cameraModel ?? string.Empty}".Trim();
         }
     }
 
