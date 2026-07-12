@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Slugify;
+using Toxon.Photography.Data;
+using Toxon.Photography.Generation.Stories;
 using Toxon.Photography.Generation.Views;
 
 namespace Toxon.Photography.Generation;
@@ -21,10 +24,13 @@ public sealed class SiteGenerator : IAsyncDisposable
     private readonly HtmlRenderer _htmlRenderer;
     private readonly IFileProvider _assetsProvider;
     private readonly DynamoDbImageProvider _imageProvider;
+    private readonly StoryProvider _storyProvider;
 
-    public SiteGenerator(DynamoDbImageProvider imageProvider)
+    public SiteGenerator(DynamoDbImageProvider imageProvider, StoryProvider storyProvider)
     {
         _imageProvider = imageProvider;
+        _storyProvider = storyProvider;
+        
         var services = new ServiceCollection();
         services.AddLogging();
 
@@ -43,6 +49,11 @@ public sealed class SiteGenerator : IAsyncDisposable
             await RenderPage<AboutPage>("about.html", new Dictionary<string, object?>()),
             await RenderPage<GearPage>("gear.html", new Dictionary<string, object?>()),
         };
+        
+        await foreach (var file in GenerateStories())
+        {
+            files.Add(file);
+        }
 
         await foreach (var asset in GenerateAssets())
         {
@@ -50,6 +61,45 @@ public sealed class SiteGenerator : IAsyncDisposable
         }
         
         return new Site(files);
+    }
+
+    private async IAsyncEnumerable<Site.File> GenerateStories()
+    {
+        var stories = await  _storyProvider.GetStoriesAsync();
+        
+        var slugs = new HashSet<string>();
+        var slugHelper = new SlugHelper();
+
+        foreach(var story in stories)
+        {
+            var photographIds = story.Sections
+                .SelectMany(x => x.Blocks)
+                .OfType<ImageBlock>()
+                .Select(x => x.PhotographId!)
+                .Where(x => !string.IsNullOrEmpty(x))
+                .ToHashSet();
+            
+            var photographs = await _imageProvider.GetPhotographsByIdAsync(photographIds);
+
+            var slug = slugHelper.GenerateSlug(story.Title);
+            if (!slugs.Add(slug))
+            {
+                var originalSlug = slug;
+                var index = 2;
+                while (!slugs.Add(slug))
+                {
+                    slug = $"{originalSlug}-{index}";
+                    index++;
+                }
+            }
+            
+            yield return await RenderPage<StoryPage>($"stories/{slug}.html", new Dictionary<string, object?>
+            {
+                { nameof(StoryPage.Slug), slug },
+                { nameof(StoryPage.Story), story },
+                { nameof(StoryPage.Photographs), photographs.ToDictionary(x => x.Photograph.Id.ToString()) }
+            });
+        }
     }
 
     private async IAsyncEnumerable<Site.File> GenerateAssets()

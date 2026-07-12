@@ -6,8 +6,8 @@ using Amazon.EventBridge;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.Lambda;
 using Amazon.S3;
-using SixLabors.ImageSharp.Metadata;
 using Toxon.Photography.ImageProcessing;
+using Toxon.Photography.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +39,7 @@ builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 builder.Services.AddTransient<MetadataProcessor>();
 builder.Services.AddTransient<ThumbnailProcessor>();
 builder.Services.AddTransient<TitleSuggestionProcessor>();
+builder.Services.AddSingleton<IStoryGenerationService, StoryGenerationService>();
 
 var app = builder.Build();
 

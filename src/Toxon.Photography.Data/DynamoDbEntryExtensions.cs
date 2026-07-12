@@ -3,8 +3,7 @@ using Amazon.DynamoDBv2.DocumentModel;
 
 namespace Toxon.Photography.Data
 {
-    // ReSharper disable once InconsistentNaming same as original typre
-    public static class DynamoDBEntryExtensions
+    public static class DynamoDbEntryExtensions
     {
         public static DynamoDBEntry TryGetNull(this Document document, string attributeName)
         {
@@ -24,6 +23,16 @@ namespace Toxon.Photography.Data
             }
 
             return entry.AsInt();
+        }
+        
+        public static DateTime? AsDateTimeNullable(this DynamoDBEntry entry)
+        {
+            if (entry is DynamoDBNull)
+            {
+                return null;
+            }
+
+            return entry.AsDateTime();
         }
     }
 }

@@ -21,6 +21,7 @@ Globals:
     Environment:
       Variables:
         PHOTOGRAPH_TABLE: !Ref PhotographyTable
+        STORY_TABLE: !Ref StoriesTable
         IMAGE_BUCKET: !Ref ImageBucket
         SITE_BUCKET: !Ref SiteBucket
 
@@ -29,6 +30,14 @@ Parameters:
     Type: String
   SiteAliases:
     Type: CommaDelimitedList
+  CloudFrontImageBaseUrl:
+    Type: String
+  CloudFrontImageKeyPairId:
+    Type: String
+  CloudFrontImageTrustedKeyGroupId:
+    Type: String
+  CloudFrontPrivateKeySsmPath:
+    Type: String
 
 Resources:
   ApiFunction:
@@ -44,6 +53,8 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref PhotographyTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StoriesTable
         - S3CrudPolicy:
             BucketName: !Ref ImageBucket
         - LambdaInvokePolicy:
@@ -58,6 +69,7 @@ Resources:
                 - bedrock:InvokeModelWithResponseStream
               Resource:
                 - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-lite-v1:0"
+                - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/amazon.nova-pro-v1:0"
       Events:
         ProxyResource:
           Type: HttpApi
@@ -83,11 +95,14 @@ Resources:
       MemorySize: 1024
       Environment:
         Variables:
-          SITE_GENERATOR_ACCESS_KEY_SSM_PATH: !GetAtt [SSMParameterSetter, AccessKeyPath]
-          SITE_GENERATOR_SECRET_KEY_SSM_PATH: !GetAtt [SSMParameterSetter, SecretKeyPath]
+          CLOUDFRONT_IMAGE_BASE_URL: !Ref CloudFrontImageBaseUrl
+          CLOUDFRONT_IMAGE_KEY_PAIR_ID: !Ref CloudFrontImageKeyPairId
+          CLOUDFRONT_PRIVATE_KEY_SSM_PATH: !Ref CloudFrontPrivateKeySsmPath
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref PhotographyTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref StoriesTable
         - S3ReadPolicy:
             BucketName: !Ref ImageBucket
         - S3CrudPolicy:
@@ -97,10 +112,8 @@ Resources:
             - Effect: Allow
               Action:
                 - ssm:GetParameter
-                - ssm:GetParameters
               Resource:
-                - !Join ["", ["arn:aws:ssm:*:*:parameter", !GetAtt [SSMParameterSetter, AccessKeyPath]]]
-                - !Join ["", ["arn:aws:ssm:*:*:parameter", !GetAtt [SSMParameterSetter, SecretKeyPath]]]
+                - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${CloudFrontPrivateKeySsmPath}"
       Events:
         ScheduleEvent:
           Type: ScheduleV2
@@ -120,19 +133,52 @@ Resources:
         Aliases: !Ref SiteAliases
         DefaultCacheBehavior:
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
-          TargetOriginId: s3
+          TargetOriginId: site-s3
           ViewerProtocolPolicy: redirect-to-https
+        CacheBehaviors:
+          - PathPattern: "thumbnail/*"
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+            TargetOriginId: image-s3
+            ViewerProtocolPolicy: redirect-to-https
+            TrustedKeyGroups:
+              - !Ref CloudFrontImageTrustedKeyGroupId
 
         Origins:
-          - Id: s3
-            DomainName: !Sub ${SiteBucket}.s3-website.${AWS::Region}.amazonaws.com
-            CustomOriginConfig:
-              OriginProtocolPolicy: http-only
+          - Id: site-s3
+            DomainName: !GetAtt [SiteBucket, RegionalDomainName]
+            OriginAccessControlId: !Ref SiteBucketCloudFrontOac
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+          - Id: image-s3
+            DomainName: !GetAtt [ImageBucket, RegionalDomainName]
+            OriginAccessControlId: !Ref ImageBucketCloudFrontOac
+            S3OriginConfig:
+              OriginAccessIdentity: ""
 
         ViewerCertificate: 
           AcmCertificateArn: !Ref SiteAcmCertificateArn
           MinimumProtocolVersion: TLSv1.2_2021
           SslSupportMethod: sni-only
+
+  SiteBucketCloudFrontOac:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Join ["-", ["photography-site-oac", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+        Description: Access control for site bucket
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  ImageBucketCloudFrontOac:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Join ["-", ["photography-images-oac", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+        Description: Access control for image bucket
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
 
   PhotographyTable:
     Type: AWS::Serverless::SimpleTable
@@ -145,12 +191,28 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
         
+  StoriesTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Join ["-", ["photography-stories", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
   ImageBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Join ["-", ["photography-images", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       CorsConfiguration: 
         CorsRules:
           - AllowedHeaders:
@@ -174,12 +236,10 @@ Resources:
     Properties:
       BucketName: !Join ["-", ["photography-site", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
-      WebsiteConfiguration:
-        IndexDocument: index.html
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
   SiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties: 
@@ -190,7 +250,27 @@ Resources:
           - Action: "s3:GetObject"
             Effect: Allow
             Resource: !Join ["", ["arn:aws:s3:::", !Ref SiteBucket, "/*"]]
-            Principal: "*"
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${SiteCloudfront}"
+
+  ImageBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ImageBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action: "s3:GetObject"
+            Effect: Allow
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref ImageBucket, "/*"]]
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${SiteCloudfront}"
             
   # cognito for the admin panel
   AdminUserPool:
@@ -258,81 +338,6 @@ Resources:
                 Resource: 
                   - !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ServerlessHttpApi}/*"
   
-  # we need a real IAM user to pre-sign S3 URLs for reasons...
-  S3SigningUser:
-    Type: AWS::IAM::User
-    Properties: 
-      UserName: !Join ["-", ["photography-signing", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]]]]
-  S3SigningUserPolicy:
-    Type: AWS::IAM::UserPolicy
-    Properties: 
-      UserName: !Ref S3SigningUser
-      PolicyName: AccessImageBucket
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Action: "s3:GetObject"
-            Effect: Allow
-            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref ImageBucket, "/*" ] ]
-  S3SigningUserCredentials:
-    Type: AWS::IAM::AccessKey
-    Properties:
-      UserName: !Ref S3SigningUser
-      Serial: 0
-  SSMParameterSetter:
-    Type: Custom::SSMParameterSetter
-    Properties:
-      ServiceToken: !GetAtt SSMParameterSetterLambda.Arn
-      Prefix: !Join ["/", ["/photography", !Select ["0", !Split ["-", !Select ["2", !Split ["/", !Ref AWS::StackId ]]]], "SigningUser"]]
-      AccessKey: !Ref S3SigningUserCredentials
-      SecretKey: !GetAtt [S3SigningUserCredentials, SecretAccessKey]
-  SSMParameterSetterLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      Runtime: python3.12
-      Handler: index.handler
-      Policies:
-        - Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action:
-                - ssm:PutParameter
-                - ssm:DeleteParameter
-              Resource: "arn:aws:ssm:*:*:parameter/*"
-      InlineCode: |
-        import cfnresponse
-        import boto3
-        from botocore.exceptions import ClientError
-        
-        ssm = boto3.client("ssm")
-      
-        def handler(event, context):
-          try:
-            prefix = event["ResourceProperties"]["Prefix"]
-
-            if event["RequestType"] == "Create" or event["RequestType"] == "Update":
-              access_key = event["ResourceProperties"]["AccessKey"]
-              secret_key = event["ResourceProperties"]["SecretKey"]
-              
-              ssm.put_parameter(Name=f"{prefix}AccessKey", Value=access_key, Type="SecureString", Overwrite=True)
-              ssm.put_parameter(Name=f"{prefix}SecretKey", Value=secret_key, Type="SecureString", Overwrite=True)
-            
-              cfnresponse.send(event, context, cfnresponse.SUCCESS, {"AccessKeyPath": f"{prefix}AccessKey", "SecretKeyPath": f"{prefix}SecretKey"}, prefix)
-            elif event["RequestType"] == "Delete":              
-              ssm.delete_parameter(Name=f"{prefix}AccessKey")
-              ssm.delete_parameter(Name=f"{prefix}SecretKey")
-              
-              cfnresponse.send(event, context, cfnresponse.SUCCESS, {}, prefix)
-            else:
-              cfnresponse.send(event, context, cfnresponse.FAILED)
-          
-          except ClientError as error:
-            print(error)
-            cfnresponse.send(event, context, cfnresponse.FAILED, {"code": error.response["Error"]["Code"]}, prefix)
-          except error:
-            print(error)
-            cfnresponse.send(event, context, cfnresponse.FAILED, {"error" : error}, prefix)
-
 Outputs:
   WebEndpoint:
     Description: "API Gateway endpoint URL"
@@ -340,9 +345,6 @@ Outputs:
   ImageBucket:
     Description: "Image bucket name"
     Value: !Ref ImageBucket
-  SiteBucketEndpoint:
-    Description: "Generated site bucket website URL"
-    Value: !GetAtt [SiteBucket, WebsiteURL]
   SiteEndpoint:
     Description: "Generated site cloudfront URL"
     Value: !Join ["", ["https://", !GetAtt [SiteCloudfront, DomainName]]]

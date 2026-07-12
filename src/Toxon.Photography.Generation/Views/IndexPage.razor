@@ -41,7 +41,7 @@
         
         <div class="modal fade" id="image-modal">
             <div class="modal-dialog modal-dialog-centered modal-xl">
-                <div class="modal-body">
+                <div class="modal-body text-center">
                 </div>
             </div>
         </div>
@@ -66,5 +66,5 @@
 
 @code {
     [Parameter, EditorRequired]
-    public IEnumerable<PhotographViewModel> Photographs { get; set; }
+    public IEnumerable<PhotographWithLayoutViewModel> Photographs { get; set; }
 }

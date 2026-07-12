@@ -2,7 +2,6 @@
 using Amazon.DynamoDBv2.DocumentModel;
 using Microsoft.AspNetCore.Mvc;
 using Toxon.Photography.Data;
-using Toxon.Photography.Generation.Extensions;
 using Toxon.Photography.Models;
 
 namespace Toxon.Photography.Controllers;
