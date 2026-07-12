@@ -1,10 +1,7 @@
 ﻿using System.Text;
-using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.S3;
 using Amazon.S3.Model;
-using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 using Toxon.Photography.Data;
 using Toxon.Photography.Data.Config;
 
@@ -15,7 +12,7 @@ public class ThumbnailProcessor(IAmazonS3 s3)
     public async Task<Image> Process(Image image, ThumbnailSettings settings)
     {
         var original = await GetImageStream(image);
-        
+
         var (processed, format, width, height) = await ProcessImageAsync(original, settings);
         var key = await UploadToS3Async(processed, format);
 
@@ -29,27 +26,37 @@ public class ThumbnailProcessor(IAmazonS3 s3)
     }
 
     private async Task<Stream> GetImageStream(Image image) => (await s3.GetObjectAsync(BucketNames.Images, image.ObjectKey)).ResponseStream;
-    
-    private async Task<(Stream Stream, IImageFormat Format, int Width, int Height)> ProcessImageAsync(Stream input, ThumbnailSettings settings)
+
+    public static async Task<(Stream Stream, string MimeType, int Width, int Height)> ProcessImageAsync(Stream input, ThumbnailSettings settings) =>
+        await Task.Run(() => ProcessImage(input, settings));
+
+    public static (Stream Stream, string MimeType, int Width, int Height) ProcessImage(Stream input, ThumbnailSettings settings)
     {
         var output = new MemoryStream();
-
-        int width;
-        int height;
         
-        using (var image = await SixLabors.ImageSharp.Image.LoadAsync(input))
+        using var original = SKBitmap.Decode(input);
+        if (original == null)
         {
-            (width, height) = settings.CalculateDimensions(image.Width, image.Height);
+            throw new InvalidOperationException("Failed to decode image");
+        }
+        
+        var (width, height) = settings.CalculateDimensions(original.Width, original.Height);
 
-            image.Mutate(x => x.Resize(width, height));
-            
-            await SixLabors.ImageSharp.ImageExtensions.SaveAsJpegAsync(image, output, new JpegEncoder { Quality = settings.Quality });
+        using var resized = original.Resize(new SKImageInfo(width, height), SKSamplingOptions.Default);
+        if (resized == null)
+        {
+            throw new InvalidOperationException("Failed to resize image");
         }
 
-        return (output, JpegFormat.Instance, width, height);
+        using var data = resized.Encode(SKEncodedImageFormat.Jpeg, settings.Quality);
+        data.SaveTo(output);
+        output.Seek(0, SeekOrigin.Begin);
+        
+        return (output, "image/jpeg", width, height);
     }
 
-    private async Task<string> UploadToS3Async(Stream thumbnail, IImageFormat format)
+
+    private async Task<string> UploadToS3Async(Stream thumbnail, string mimeType)
     {
         var thumbnailKey = "thumbnail/" + GenerateKey();
         await s3.PutObjectAsync(new PutObjectRequest
@@ -57,7 +64,7 @@ public class ThumbnailProcessor(IAmazonS3 s3)
             BucketName = BucketNames.Images,
             Key = thumbnailKey,
             InputStream = thumbnail,
-            ContentType = format.DefaultMimeType,
+            ContentType = mimeType,
         });
         return thumbnailKey;
     }

@@ -45,7 +45,7 @@ Resources:
     Properties:
       CodeUri: ./src/Toxon.Photography/
       Handler: Toxon.Photography
-      Runtime: dotnet8
+      Runtime: dotnet10
       MemorySize: 10240
       Environment:
         Variables:
@@ -91,7 +91,7 @@ Resources:
     Properties:
       CodeUri: ./src/Toxon.Photography.Generation
       Handler: Toxon.Photography.Generation::Toxon.Photography.Generation.SiteGeneratorLambda::FunctionHandlerAsync
-      Runtime: dotnet8
+      Runtime: dotnet10
       MemorySize: 1024
       Environment:
         Variables:
